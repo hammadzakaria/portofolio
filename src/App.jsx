@@ -169,9 +169,22 @@ export default function App() {
   const [expSlideIdx, setExpSlideIdx] = useState(0);
   const [expAnimating, setExpAnimating] = useState(false);
   const [expDirection, setExpDirection] = useState('next');
-  const [expPerPage, setExpPerPage] = useState(3);
+  const [expPerPage, setExpPerPage] = useState(2);
+
+  const [eduSlideIdx, setEduSlideIdx] = useState(0);
+  const [eduAnimating, setEduAnimating] = useState(false);
+  const [eduDirection, setEduDirection] = useState('next');
+  const [eduPerPage, setEduPerPage] = useState(2);
+
+  const [certSlideIdx, setCertSlideIdx] = useState(0);
+  const [certAnimating, setCertAnimating] = useState(false);
+  const [certDirection, setCertDirection] = useState('next');
+  const [certPerPage, setCertPerPage] = useState(4);
+
   useEffect(() => {
-    setExpPerPage(isMobile ? 1 : 3);
+    setExpPerPage(isMobile ? 1 : 2);
+    setEduPerPage(isMobile ? 1 : 2);
+    setCertPerPage(isMobile ? 1 : 4);
   }, [isMobile]);
   
   // Admin Mode states
@@ -438,6 +451,34 @@ export default function App() {
     }, 250);
   }, [expAnimating, expSlideIdx, experiences.length, expPerPage]);
 
+  // Smooth education slide navigation
+  const goEduSlide = useCallback((dir) => {
+    if (eduAnimating) return;
+    const maxPage = Math.ceil(education.length / eduPerPage) - 1;
+    const nextIdx = dir === 'next' ? Math.min(eduSlideIdx + 1, maxPage) : Math.max(eduSlideIdx - 1, 0);
+    if (nextIdx === eduSlideIdx) return;
+    setEduDirection(dir);
+    setEduAnimating(true);
+    setTimeout(() => {
+      setEduSlideIdx(nextIdx);
+      setTimeout(() => setEduAnimating(false), 50);
+    }, 250);
+  }, [eduAnimating, eduSlideIdx, education.length, eduPerPage]);
+
+  // Smooth certification slide navigation
+  const goCertSlide = useCallback((dir) => {
+    if (certAnimating) return;
+    const maxPage = Math.ceil(certificates.length / certPerPage) - 1;
+    const nextIdx = dir === 'next' ? Math.min(certSlideIdx + 1, maxPage) : Math.max(certSlideIdx - 1, 0);
+    if (nextIdx === certSlideIdx) return;
+    setCertDirection(dir);
+    setCertAnimating(true);
+    setTimeout(() => {
+      setCertSlideIdx(nextIdx);
+      setTimeout(() => setCertAnimating(false), 50);
+    }, 250);
+  }, [certAnimating, certSlideIdx, certificates.length, certPerPage]);
+
   // Admin drag-and-drop handlers
   const getAdminList = () => {
     if (adminTab === 'projects') return projects;
@@ -700,7 +741,7 @@ export default function App() {
               activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-24 h-[65vh] md:h-auto overflow-y-auto no-scrollbar py-6 md:py-0 mt-16 md:mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-24 h-[65vh] md:h-auto overflow-y-auto no-scrollbar py-6 md:py-0 mt-16 md:mt-0 pb-28 md:pb-0">
               
               {/* Left Column */}
               <div className="space-y-12">
@@ -734,50 +775,85 @@ export default function App() {
 
                 {/* Certifications (White Header) */}
                 <div className="space-y-6 border-t border-gray-900 pt-6">
-                  <h3 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight flex items-center space-x-2">
-                    <Award size={22} className="text-white" />
-                    <span>{t('certifications')}</span>
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight flex items-center space-x-2">
+                      <Award size={22} className="text-white" />
+                      <span>{t('certifications')}</span>
+                    </h3>
+                    {certificates.length > certPerPage && (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => goCertSlide('prev')}
+                          disabled={certSlideIdx === 0}
+                          className={`p-1 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
+                            certSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          <ChevronLeft size={10} />
+                        </button>
+                        <span className="text-[8px] font-mono text-gray-500 text-center min-w-[20px]">
+                          {certSlideIdx + 1}/{Math.ceil(certificates.length / certPerPage)}
+                        </span>
+                        <button
+                          onClick={() => goCertSlide('next')}
+                          disabled={certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1}
+                          className={`p-1 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
+                            certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          <ChevronRight size={10} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    {certificates.map((cert) => {
-                      const cardContent = (
-                        <div className="group relative border border-gray-900 bg-darkCard/30 p-3 hover:border-white transition-colors h-full flex flex-col justify-between cursor-pointer">
-                          <div>
-                            <div className="flex justify-between items-start">
-                              <p className="text-[10px] sm:text-xs font-bold text-white uppercase pr-3">{cert.title}</p>
-                              {cert.link && (
-                                <ExternalLink size={10} className="text-accentCyan opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
-                              )}
+                  <div className="overflow-hidden relative">
+                    <div 
+                      className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-3 sm:gap-4 transition-all duration-400 ease-out ${
+                        certAnimating 
+                          ? `opacity-0 ${certDirection === 'next' ? 'translate-x-8' : '-translate-x-8'}` 
+                          : 'opacity-100 translate-x-0'
+                      }`}
+                    >
+                      {certificates.slice(certSlideIdx * certPerPage, certSlideIdx * certPerPage + certPerPage).map((cert) => {
+                        const cardContent = (
+                          <div className="group relative border border-gray-900 bg-darkCard/30 p-3 hover:border-white transition-colors h-full flex flex-col justify-between cursor-pointer">
+                            <div>
+                              <div className="flex justify-between items-start">
+                                <p className="text-[10px] sm:text-xs font-bold text-white uppercase pr-3">{cert.title}</p>
+                                {cert.link && (
+                                  <ExternalLink size={10} className="text-accentCyan opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                                )}
+                              </div>
+                              <p className="text-[9px] sm:text-[10px] text-gray-500">{cert.issuer} • {cert.year}</p>
                             </div>
-                            <p className="text-[9px] sm:text-[10px] text-gray-500">{cert.issuer} • {cert.year}</p>
                           </div>
-                        </div>
-                      );
-
-                      if (cert.link) {
-                        return (
-                          <a 
-                            key={cert.id} 
-                            href={cert.link} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="block h-full"
-                          >
-                            {cardContent}
-                          </a>
                         );
-                      }
 
-                      return (
-                        <div key={cert.id} className="h-full">
-                          <div className="border border-gray-900 bg-darkCard/30 p-3 hover:border-gray-700 transition-colors h-full">
-                            <p className="text-xs font-bold text-white uppercase">{cert.title}</p>
-                            <p className="text-[10px] text-gray-500">{cert.issuer} • {cert.year}</p>
+                        if (cert.link) {
+                          return (
+                            <a 
+                              key={cert.id} 
+                              href={cert.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="block h-full"
+                            >
+                              {cardContent}
+                            </a>
+                          );
+                        }
+
+                        return (
+                          <div key={cert.id} className="h-full">
+                            <div className="border border-gray-900 bg-darkCard/30 p-3 hover:border-gray-700 transition-colors h-full">
+                              <p className="text-xs font-bold text-white uppercase">{cert.title}</p>
+                              <p className="text-[10px] text-gray-500">{cert.issuer} • {cert.year}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -853,25 +929,63 @@ export default function App() {
 
                   {/* Education timeline items */}
                   <div className="space-y-6 border-t border-gray-900/50 pt-6">
-                    <div className="relative flex items-center">
-                      <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                        <BookOpen size={8} className="text-white" />
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                          <BookOpen size={8} className="text-white" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
+                          {t('education')}
+                        </h3>
                       </div>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
-                        {t('education')}
-                      </h3>
+
+                      {/* Slide controls */}
+                      {education.length > eduPerPage && (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => goEduSlide('prev')}
+                            disabled={eduSlideIdx === 0}
+                            className={`p-1.5 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
+                              eduSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            <ChevronLeft size={12} />
+                          </button>
+                          <span className="text-[9px] font-mono text-gray-500 min-w-[32px] text-center">
+                            {eduSlideIdx + 1}/{Math.ceil(education.length / eduPerPage)}
+                          </span>
+                          <button
+                            onClick={() => goEduSlide('next')}
+                            disabled={eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1}
+                            className={`p-1.5 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
+                              eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            <ChevronRight size={12} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="space-y-4">
-                      {education.map((edu) => (
-                        <div key={edu.id} className="space-y-1">
-                          <div className="flex justify-between items-baseline">
-                            <p className="text-[10px] sm:text-xs font-semibold text-white uppercase">{edu.institution}</p>
-                            <span className="text-[8px] sm:text-[9px] font-mono text-gray-500">{edu.duration}</span>
+                    {/* Education content with smooth slide transition */}
+                    <div className="overflow-hidden relative">
+                      <div 
+                        className={`space-y-4 transition-all duration-400 ease-out ${
+                          eduAnimating 
+                            ? `opacity-0 ${eduDirection === 'next' ? 'translate-x-8' : '-translate-x-8'}` 
+                            : 'opacity-100 translate-x-0'
+                        }`}
+                      >
+                        {education.slice(eduSlideIdx * eduPerPage, eduSlideIdx * eduPerPage + eduPerPage).map((edu) => (
+                          <div key={edu.id} className="space-y-1">
+                            <div className="flex justify-between items-baseline">
+                              <p className="text-[10px] sm:text-xs font-semibold text-white uppercase">{edu.institution}</p>
+                              <span className="text-[8px] sm:text-[9px] font-mono text-gray-500">{edu.duration}</span>
+                            </div>
+                            <p className="text-[10px] sm:text-xs text-textMuted font-light">{getField(edu, 'degree')}</p>
                           </div>
-                          <p className="text-[10px] sm:text-xs text-textMuted font-light">{getField(edu, 'degree')}</p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
 
