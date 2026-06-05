@@ -169,7 +169,10 @@ export default function App() {
   const [expSlideIdx, setExpSlideIdx] = useState(0);
   const [expAnimating, setExpAnimating] = useState(false);
   const [expDirection, setExpDirection] = useState('next');
-  const expPerPage = 3;
+  const [expPerPage, setExpPerPage] = useState(3);
+  useEffect(() => {
+    setExpPerPage(isMobile ? 1 : 3);
+  }, [isMobile]);
   
   // Admin Mode states
   const [adminMode, setAdminMode] = useState(false);
@@ -666,10 +669,6 @@ export default function App() {
                     ? "Seorang junior network engineer dan cloud engineer. Spesialisasi dalam infrastruktur jaringan Mikrotik, Cisco, dan deployment AWS dengan fokus pada presisi dan keamanan data."
                     : "A junior network engineer and cloud engineer. Specializing in MikroTik network infrastructure, Cisco routing, and AWS cloud deployment with a focus on data security and precision."}
                 </p>
-                <div className="pt-2 sm:pt-4 flex items-center space-x-2 text-[10px] sm:text-xs font-semibold tracking-widest text-white/70 uppercase">
-                  <MapPin size={14} className="text-accentCyan" />
-                  <span>Indonesia, ID</span>
-                </div>
 
                 {/* Social Media Links */}
                 <div className="pt-3 sm:pt-5 flex items-center justify-center md:justify-start space-x-5">
@@ -701,7 +700,7 @@ export default function App() {
               activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-24 h-[85vh] md:h-auto overflow-y-auto no-scrollbar py-20 md:py-0 pt-16 md:pt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-24 h-[65vh] md:h-auto overflow-y-auto no-scrollbar py-6 md:py-0 mt-16 md:mt-0">
               
               {/* Left Column */}
               <div className="space-y-12">
