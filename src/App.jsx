@@ -734,14 +734,14 @@ export default function App() {
         {/* SECTION 3: RESUME PAGE */}
         <section 
           id="section-resume"
-          className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-center px-6 sm:px-12 md:px-24 bg-darkBg"
+          className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-start md:justify-center px-6 sm:px-12 md:px-24 bg-darkBg pt-16 md:pt-0"
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
               activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-24 h-[65vh] md:h-auto overflow-y-auto no-scrollbar py-6 md:py-0 mt-16 md:mt-0 pb-28 md:pb-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12 md:gap-24 md:h-auto py-2 md:py-0 pb-20 md:pb-0">
               
               {/* Left Column */}
               <div className="space-y-12">
@@ -781,27 +781,27 @@ export default function App() {
                       <span>{t('certifications')}</span>
                     </h3>
                     {certificates.length > certPerPage && (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 bg-darkCard/50 p-1 rounded-lg border border-gray-800">
                         <button
                           onClick={() => goCertSlide('prev')}
                           disabled={certSlideIdx === 0}
-                          className={`p-1 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
-                            certSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                          className={`p-1.5 rounded transition-colors focus:outline-none ${
+                            certSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
                           }`}
                         >
-                          <ChevronLeft size={10} />
+                          <ChevronLeft size={14} />
                         </button>
-                        <span className="text-[8px] font-mono text-gray-500 text-center min-w-[20px]">
-                          {certSlideIdx + 1}/{Math.ceil(certificates.length / certPerPage)}
+                        <span className="text-xs font-bold text-gray-300 min-w-[36px] text-center">
+                          {certSlideIdx + 1} / {Math.ceil(certificates.length / certPerPage)}
                         </span>
                         <button
                           onClick={() => goCertSlide('next')}
                           disabled={certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1}
-                          className={`p-1 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
-                            certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                          className={`p-1.5 rounded transition-colors focus:outline-none ${
+                            certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
                           }`}
                         >
-                          <ChevronRight size={10} />
+                          <ChevronRight size={14} />
                         </button>
                       </div>
                     )}
@@ -876,27 +876,27 @@ export default function App() {
 
                       {/* Slide controls */}
                       {experiences.length > expPerPage && (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 bg-darkCard/50 p-1 rounded-lg border border-gray-800">
                           <button
                             onClick={() => goExpSlide('prev')}
                             disabled={expSlideIdx === 0}
-                            className={`p-1.5 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
-                              expSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                            className={`p-1.5 rounded transition-colors focus:outline-none ${
+                              expSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
                             }`}
                           >
-                            <ChevronLeft size={12} />
+                            <ChevronLeft size={14} />
                           </button>
-                          <span className="text-[9px] font-mono text-gray-500 min-w-[32px] text-center">
-                            {expSlideIdx + 1}/{Math.ceil(experiences.length / expPerPage)}
+                          <span className="text-xs font-bold text-gray-300 min-w-[36px] text-center">
+                            {expSlideIdx + 1} / {Math.ceil(experiences.length / expPerPage)}
                           </span>
                           <button
                             onClick={() => goExpSlide('next')}
                             disabled={expSlideIdx >= Math.ceil(experiences.length / expPerPage) - 1}
-                            className={`p-1.5 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
-                              expSlideIdx >= Math.ceil(experiences.length / expPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                            className={`p-1.5 rounded transition-colors focus:outline-none ${
+                              expSlideIdx >= Math.ceil(experiences.length / expPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
                             }`}
                           >
-                            <ChevronRight size={12} />
+                            <ChevronRight size={14} />
                           </button>
                         </div>
                       )}
@@ -941,27 +941,27 @@ export default function App() {
 
                       {/* Slide controls */}
                       {education.length > eduPerPage && (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 bg-darkCard/50 p-1 rounded-lg border border-gray-800">
                           <button
                             onClick={() => goEduSlide('prev')}
                             disabled={eduSlideIdx === 0}
-                            className={`p-1.5 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
-                              eduSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                            className={`p-1.5 rounded transition-colors focus:outline-none ${
+                              eduSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
                             }`}
                           >
-                            <ChevronLeft size={12} />
+                            <ChevronLeft size={14} />
                           </button>
-                          <span className="text-[9px] font-mono text-gray-500 min-w-[32px] text-center">
-                            {eduSlideIdx + 1}/{Math.ceil(education.length / eduPerPage)}
+                          <span className="text-xs font-bold text-gray-300 min-w-[36px] text-center">
+                            {eduSlideIdx + 1} / {Math.ceil(education.length / eduPerPage)}
                           </span>
                           <button
                             onClick={() => goEduSlide('next')}
                             disabled={eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1}
-                            className={`p-1.5 border border-gray-800 rounded-full transition-all duration-300 focus:outline-none ${
-                              eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:border-white text-gray-400 hover:text-white'
+                            className={`p-1.5 rounded transition-colors focus:outline-none ${
+                              eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
                             }`}
                           >
-                            <ChevronRight size={12} />
+                            <ChevronRight size={14} />
                           </button>
                         </div>
                       )}
