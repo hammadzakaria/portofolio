@@ -199,8 +199,9 @@ export default function App() {
   // Detect URL Route path or query for Admin entry
   useEffect(() => {
     const checkAdminPath = () => {
-      const href = window.location.href;
-      if (href.includes('hammadzakaria')) {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path.endsWith('/hammadzakaria') || hash.includes('hammadzakaria')) {
         setAdminMode(true);
       }
     };
@@ -639,7 +640,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-16 items-center pt-16 sm:pt-12">
               {/* Photo - shows first on mobile (order-1 mobile, order-2 desktop) */}
               <div className="md:col-span-5 flex justify-center order-1 md:order-2">
-                <div className="relative group max-w-[160px] sm:max-w-xs md:max-w-md w-full aspect-[3/4] border border-gray-800 p-2 overflow-hidden bg-black">
+                <div className="relative group max-w-[120px] sm:max-w-xs md:max-w-md w-full aspect-[3/4] border border-gray-800 p-2 overflow-hidden bg-black mx-auto">
                   <div 
                     className="w-full h-full bg-cover bg-center grayscale contrast-125 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
                     style={{ backgroundImage: 'url(/profile_portrait.png)' }}
@@ -653,14 +654,14 @@ export default function App() {
               </div>
 
               {/* Text content - shows second on mobile (order-2 mobile, order-1 desktop) */}
-              <div className="md:col-span-7 space-y-4 sm:space-y-6 order-2 md:order-1">
+              <div className="md:col-span-7 space-y-3 sm:space-y-6 order-2 md:order-1 text-center md:text-left flex flex-col items-center md:items-start">
                 <span className="text-[10px] sm:text-xs font-bold tracking-mega text-gray-500 uppercase block">
                   {lang === 'id' ? 'PENGENALAN' : 'INTRODUCTION'}
                 </span>
-                <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white tracking-tight uppercase">
+                <h2 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white tracking-tight uppercase">
                   {t('about')}
                 </h2>
-                <p className="text-sm sm:text-lg md:text-xl font-light text-textMuted leading-relaxed max-w-2xl select-text">
+                <p className="text-xs sm:text-lg md:text-xl font-light text-textMuted leading-relaxed max-w-2xl select-text">
                   {lang === 'id' 
                     ? "Seorang junior network engineer dan cloud engineer. Spesialisasi dalam infrastruktur jaringan Mikrotik, Cisco, dan deployment AWS dengan fokus pada presisi dan keamanan data."
                     : "A junior network engineer and cloud engineer. Specializing in MikroTik network infrastructure, Cisco routing, and AWS cloud deployment with a focus on data security and precision."}
@@ -671,7 +672,7 @@ export default function App() {
                 </div>
 
                 {/* Social Media Links */}
-                <div className="pt-3 sm:pt-5 flex items-center space-x-5">
+                <div className="pt-3 sm:pt-5 flex items-center justify-center md:justify-start space-x-5">
                   <a href="https://www.linkedin.com/in/hammadzakaria" target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                     <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">LinkedIn</span>
