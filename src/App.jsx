@@ -729,7 +729,7 @@ export default function App() {
         {/* SECTION 3: RESUME PAGE */}
         <section 
           id="section-resume"
-          className="page-section-snap h-auto min-h-screen md:h-screen w-full snap-start relative flex flex-col justify-start md:justify-center px-6 sm:px-12 md:px-24 bg-darkBg pt-24 md:pt-0 pb-24 md:pb-0"
+          className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-start md:justify-center px-6 sm:px-12 md:px-24 bg-darkBg pt-16 md:pt-0"
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
@@ -739,7 +739,7 @@ export default function App() {
             <div className="md:grid md:grid-cols-2 md:gap-24 md:h-auto py-2 md:py-0 space-y-12 md:space-y-0">
               
               {/* Left Column */}
-              <div className="space-y-12">
+              <div className="space-y-12 h-[80vh] md:h-auto overflow-y-auto no-scrollbar pb-10 md:pb-0">
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <span className="text-[10px] sm:text-xs font-bold tracking-mega text-gray-500 uppercase block">
@@ -840,8 +840,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right Column */}
-              <div className="space-y-12">
+              {/* Right Column (Desktop Only) */}
+              <div className="hidden md:block space-y-12">
                 <div className="relative border-l border-gray-800 pl-6 space-y-10 ml-2">
                   
                   {/* Experiences timeline items - smooth slide pagination */}
@@ -947,6 +947,115 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {/* SECTION 3b: RESUME PAGE (Mobile Page 2 - Experiences & Education) */}
+        {isMobile && (
+          <section 
+            id="section-resume-part2"
+            className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-start px-6 sm:px-12 bg-darkBg pt-16"
+          >
+            <div 
+              className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
+                activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
+              }`}
+            >
+              <div className="h-[80vh] overflow-y-auto no-scrollbar pb-10">
+                <div className="space-y-12">
+                  <div className="relative border-l border-gray-800 pl-6 space-y-10 ml-2">
+                    
+                    {/* Experiences timeline items */}
+                    <div className="space-y-6">
+                      <div className="relative flex items-center">
+                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                          <Briefcase size={8} className="text-white" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight">
+                          {t('experiences')}
+                        </h3>
+                      </div>
+                      
+                      <div className="overflow-hidden relative">
+                        <div className={`space-y-6 transition-all duration-400 ease-out ${
+                            expAnimating ? `opacity-0 ${expDirection === 'next' ? 'translate-x-8' : '-translate-x-8'}` : 'opacity-100 translate-x-0'
+                          }`}
+                        >
+                          {experiences.slice(expSlideIdx * expPerPage, expSlideIdx * expPerPage + expPerPage).map((exp) => (
+                            <div key={exp.id} className="space-y-1">
+                              <div className="flex justify-between items-baseline">
+                                <p className="text-[10px] sm:text-xs font-bold text-white uppercase">{getField(exp, 'role')}</p>
+                                <span className="text-[8px] sm:text-[9px] font-mono text-gray-500">{exp.duration}</span>
+                              </div>
+                              <p className="text-[9px] sm:text-[10px] text-accentCyan uppercase tracking-widest font-semibold">{exp.company}</p>
+                              <p className="text-[10px] sm:text-xs text-textMuted font-light leading-relaxed select-text">
+                                {getField(exp, 'description')}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        {experiences.length > expPerPage && (
+                          <div className="flex justify-center items-center space-x-2 mt-4">
+                            {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => goExpSlide(i)}
+                                className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${expSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                              >
+                                {i + 1}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Education timeline items */}
+                    <div className="space-y-6 border-t border-gray-900/50 pt-6">
+                      <div className="relative flex items-center">
+                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                          <BookOpen size={8} className="text-white" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight">
+                          {t('education')}
+                        </h3>
+                      </div>
+                      
+                      <div className="overflow-hidden relative">
+                        <div className={`space-y-4 transition-all duration-400 ease-out ${
+                            eduAnimating ? `opacity-0 ${eduDirection === 'next' ? 'translate-x-8' : '-translate-x-8'}` : 'opacity-100 translate-x-0'
+                          }`}
+                        >
+                          {education.slice(eduSlideIdx * eduPerPage, eduSlideIdx * eduPerPage + eduPerPage).map((edu) => (
+                            <div key={edu.id} className="space-y-1">
+                              <div className="flex justify-between items-baseline">
+                                <p className="text-[10px] sm:text-xs font-semibold text-white uppercase">{edu.institution}</p>
+                                <span className="text-[8px] sm:text-[9px] font-mono text-gray-500">{edu.duration}</span>
+                              </div>
+                              <p className="text-[10px] sm:text-xs text-textMuted font-light">{getField(edu, 'degree')}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {education.length > eduPerPage && (
+                          <div className="flex justify-center items-center space-x-2 mt-4">
+                            {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => goEduSlide(i)}
+                                className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${eduSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                              >
+                                {i + 1}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* SECTION 4: PORTFOLIO */}
         <section 
