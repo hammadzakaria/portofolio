@@ -157,6 +157,7 @@ export default function App() {
 
   // Active section index (controlled by scroll observer)
   const [activeIdx, setActiveIdx] = useState(0);
+  const [activeSectionId, setActiveSectionId] = useState('section-home');
 
   // Project slider pagination index
   const [projStartIdx, setProjStartIdx] = useState(0);
@@ -232,7 +233,12 @@ export default function App() {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const id = entry.target.id;
-          const index = SECTIONS.indexOf(id.replace('section-', ''));
+          setActiveSectionId(id);
+          
+          let baseId = id.replace('section-', '');
+          if (baseId.startsWith('resume')) baseId = 'resume';
+          
+          const index = SECTIONS.indexOf(baseId);
           if (index !== -1) {
             setActiveIdx(index);
           }
@@ -623,8 +629,8 @@ export default function App() {
           <div className="absolute inset-0 bg-gradient-to-r from-darkBg via-darkBg/80 to-transparent z-[2] pointer-events-none" />
 
           <div 
-            className={`max-w-[1500px] mx-auto w-full relative z-10 transition-all duration-1000 ease-in-out ${
-              activeIdx === 0 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
+            className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
+              activeSectionId === 'section-home' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
             <div className="relative z-10 space-y-4 sm:space-y-6 pt-8 sm:pt-12">
@@ -673,7 +679,7 @@ export default function App() {
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
-              activeIdx === 1 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
+              activeSectionId === 'section-about' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-16 items-center pt-16 sm:pt-12">
@@ -733,7 +739,7 @@ export default function App() {
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
-              activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
+              activeSectionId === 'section-resume' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
             <div className="md:grid md:grid-cols-2 md:gap-24 md:h-auto py-2 md:py-0 space-y-12 md:space-y-0">
@@ -956,7 +962,7 @@ export default function App() {
           >
             <div 
               className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
-                activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
+                activeSectionId === 'section-resume-part2' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
               }`}
             >
               <div className="h-[80vh] overflow-y-auto no-scrollbar pb-10">
@@ -1064,7 +1070,7 @@ export default function App() {
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
-              activeIdx === 3 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
+              activeSectionId === 'section-portfolio' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
             <div className="space-y-6 sm:space-y-8 h-[85vh] md:h-auto overflow-y-auto no-scrollbar py-20 md:py-0 pt-16 md:pt-12">
