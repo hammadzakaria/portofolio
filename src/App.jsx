@@ -955,11 +955,10 @@ export default function App() {
         </section>
 
         {/* SECTION 3b: RESUME PAGE (Mobile Page 2 - Experiences & Education) */}
-        {isMobile && (
-          <section 
-            id="section-resume-part2"
-            className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-center px-6 sm:px-12 bg-darkBg"
-          >
+        <section 
+          id="section-resume-part2"
+          className="md:hidden page-section-snap h-screen w-full snap-start relative flex flex-col justify-center px-6 sm:px-12 bg-darkBg"
+        >
             <div 
               className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
                 activeSectionId === 'section-resume-part2' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
@@ -1061,7 +1060,6 @@ export default function App() {
               </div>
             </div>
           </section>
-        )}
 
         {/* SECTION 4: PORTFOLIO */}
         <section 
