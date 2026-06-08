@@ -181,7 +181,6 @@ export default function App() {
   const [certDirection, setCertDirection] = useState('next');
   const certPerPage = 4;
 
-  const [resumeMobilePage, setResumeMobilePage] = useState(0);
   
   // Admin Mode states
   const [adminMode, setAdminMode] = useState(false);
@@ -730,17 +729,17 @@ export default function App() {
         {/* SECTION 3: RESUME PAGE */}
         <section 
           id="section-resume"
-          className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-start md:justify-center px-6 sm:px-12 md:px-24 bg-darkBg pt-16 md:pt-0"
+          className="page-section-snap h-auto min-h-screen md:h-screen w-full snap-start relative flex flex-col justify-start md:justify-center px-6 sm:px-12 md:px-24 bg-darkBg pt-24 md:pt-0 pb-24 md:pb-0"
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
               activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
-            <div className="md:grid md:grid-cols-2 md:gap-24 md:h-auto py-2 md:py-0 pb-20 md:pb-0">
+            <div className="md:grid md:grid-cols-2 md:gap-24 md:h-auto py-2 md:py-0 space-y-12 md:space-y-0">
               
               {/* Left Column */}
-              <div className={`space-y-12 ${isMobile && resumeMobilePage !== 0 ? 'hidden' : 'block'}`}>
+              <div className="space-y-12">
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <span className="text-[10px] sm:text-xs font-bold tracking-mega text-gray-500 uppercase block">
@@ -823,9 +822,9 @@ export default function App() {
                         );
                       })}
                     </div>
-                    {/* Certificates internal pagination (Desktop) */}
-                    {!isMobile && certificates.length > certPerPage && (
-                      <div className="flex justify-end items-center space-x-2 mt-4">
+                    {/* Certificates internal pagination */}
+                    {certificates.length > certPerPage && (
+                      <div className="flex justify-center md:justify-end items-center space-x-2 mt-4">
                         {Array.from({ length: Math.ceil(certificates.length / certPerPage) }).map((_, i) => (
                           <button
                             key={i}
@@ -842,7 +841,7 @@ export default function App() {
               </div>
 
               {/* Right Column */}
-              <div className={`space-y-12 ${isMobile && resumeMobilePage !== 1 ? 'hidden' : 'block'}`}>
+              <div className="space-y-12">
                 <div className="relative border-l border-gray-800 pl-6 space-y-10 ml-2">
                   
                   {/* Experiences timeline items - smooth slide pagination */}
@@ -878,9 +877,9 @@ export default function App() {
                           </div>
                         ))}
                       </div>
-                      {/* Experiences internal pagination (Desktop) */}
-                      {!isMobile && experiences.length > expPerPage && (
-                        <div className="flex justify-end items-center space-x-2 mt-4">
+                      {/* Experiences internal pagination */}
+                      {experiences.length > expPerPage && (
+                        <div className="flex justify-center md:justify-end items-center space-x-2 mt-4">
                           {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
                             <button
                               key={i}
@@ -925,9 +924,9 @@ export default function App() {
                           </div>
                         ))}
                       </div>
-                      {/* Education internal pagination (Desktop) */}
-                      {!isMobile && education.length > eduPerPage && (
-                        <div className="flex justify-end items-center space-x-2 mt-4">
+                      {/* Education internal pagination */}
+                      {education.length > eduPerPage && (
+                        <div className="flex justify-center md:justify-end items-center space-x-2 mt-4">
                           {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
                             <button
                               key={i}
@@ -945,13 +944,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Global Mobile Pagination */}
-              {isMobile && (
-                <div className="flex justify-center items-center space-x-3 mt-4 w-full md:hidden">
-                  <button onClick={() => setResumeMobilePage(0)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${resumeMobilePage === 0 ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-400 hover:text-white'}`}>1</button>
-                  <button onClick={() => setResumeMobilePage(1)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${resumeMobilePage === 1 ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-400 hover:text-white'}`}>2</button>
-                </div>
-              )}
             </div>
           </div>
         </section>
