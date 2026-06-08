@@ -147,6 +147,21 @@ const fallbackProjects = [
   }
 ];
 
+const fallbackSettings = {
+  id: 'settings',
+  cvLink: 'https://drive.google.com/file/d/1qVASHsaqqgG81hb0iNCeZhLojU97mNtk/view?usp=sharing',
+  headline_id: 'Network Engineer & Cloud Specialist',
+  headline_en: 'Network Engineer & Cloud Specialist',
+  about_id: 'Junior Network Engineer dengan sertifikasi MTCNA dan MTCRE. Terbiasa mengkonfigurasi jaringan menggunakan MikroTik dan Cisco dalam pembelajaran serta uji kompetensi. Saat ini sedang menjalani magang di CV. Faham Medika (Emhacare) untuk posisi IT & Network Support. Memiliki ketertarikan pada teknologi AI dan otomatisasi.',
+  about_en: 'Junior Network Engineer with MTCNA and MTCRE certifications. Experienced in configuring networks using MikroTik and Cisco in learning and competency tests. Currently interning at CV. Faham Medika (Emhacare) as IT & Network Support. Interested in AI technology and automation.',
+  linkedin: 'https://linkedin.com/in/hammad-zakaria',
+  website: 'https://hammadzakaria.vercel.app',
+  github: 'https://github.com/hammadzakaria',
+  youtube: 'https://www.youtube.com/@hammadzakaria',
+  homeImage: '/workstation_bg.png',
+  aboutImage: '/workstation_bg.png'
+};
+
 // Helper to get local storage if configured or return defaults
 const getLocalData = (key, defaults) => {
   const stored = localStorage.getItem(`hz_portfolio_v2_${key}`);
@@ -238,6 +253,18 @@ export async function getProjects() {
   } catch (e) {
     console.error("Error reading projects collection: ", e);
     return fallbackProjects;
+  }
+}
+
+export async function getSettings() {
+  if (!db) return getLocalData('settings', fallbackSettings);
+  try {
+    const docSnap = await getDocs(collection(db, "settings"));
+    if (docSnap.empty) return fallbackSettings;
+    return { id: docSnap.docs[0].id, ...docSnap.docs[0].data() };
+  } catch (e) {
+    console.error("Error reading settings: ", e);
+    return fallbackSettings;
   }
 }
 
@@ -483,6 +510,27 @@ export async function saveInquiry(name, email, message) {
     return { success: true, mode: 'firestore', id: docRef.id };
   } catch (e) {
     console.error("Error adding document: ", e);
+    throw e;
+  }
+}
+
+export async function saveSettings(settings) {
+  if (!db) {
+    setLocalData('settings', settings);
+    return { success: true, mode: 'local' };
+  }
+
+  try {
+    if (settings.id && settings.id !== 'settings') {
+      const { id, ...data } = settings;
+      await setDoc(doc(db, "settings", id), data);
+    } else {
+      // Use 'global' as fixed document ID for settings
+      await setDoc(doc(db, "settings", "global"), settings);
+    }
+    return { success: true, mode: 'firestore' };
+  } catch (e) {
+    console.error("Error saving settings:", e);
     throw e;
   }
 }

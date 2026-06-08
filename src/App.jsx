@@ -32,6 +32,7 @@ import {
   getEducation, 
   getExperiences,
   getProjects, 
+  getSettings,
   saveInquiry,
   saveSkill,
   deleteSkill,
@@ -42,7 +43,8 @@ import {
   saveExperience,
   deleteExperience,
   saveProject,
-  deleteProject
+  deleteProject,
+  saveSettings
 } from './firebase';
 
 const SECTIONS = ['home', 'about', 'resume', 'portfolio'];
@@ -153,6 +155,7 @@ export default function App() {
   const [education, setEducation] = useState([]);
   const [experiences, setExperiences] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [profileSettings, setProfileSettings] = useState({});
   const [loading, setLoading] = useState(true);
 
   // Active section index (controlled by scroll observer)
@@ -185,12 +188,10 @@ export default function App() {
   
   // Admin Mode states
   const [adminMode, setAdminMode] = useState(false);
-  const [adminPasscode, setAdminPasscode] = useState('');
   const [adminAuthorized, setAdminAuthorized] = useState(false);
+  const [adminPasscode, setAdminPasscode] = useState('');
   const [adminAuthError, setAdminAuthError] = useState(false);
-  const [adminTab, setAdminTab] = useState('projects');
-  
-  // Admin CRUD Editing states
+  const [adminTab, setAdminTab] = useState('profile');
   const [editingItem, setEditingItem] = useState(null);
   const [crudSubmitting, setCrudSubmitting] = useState(false);
 
@@ -257,20 +258,22 @@ export default function App() {
   // Fetch initial data
   const loadPortfolioData = async () => {
     try {
-      const [skillsData, certsData, eduData, expData, projData] = await Promise.all([
+      const [skillsData, certsData, eduData, expData, projData, settingsData] = await Promise.all([
         getSkills(),
         getCertificates(),
         getEducation(),
         getExperiences(),
-        getProjects()
+        getProjects(),
+        getSettings()
       ]);
       setSkills(skillsData);
       setCertificates(certsData);
       setEducation(eduData);
       setExperiences(expData);
       setProjects(projData);
+      setProfileSettings(settingsData);
     } catch (err) {
-      console.error("Failed to load portfolio database:", err);
+      console.error("Error loading portfolio data:", err);
     } finally {
       setLoading(false);
     }
@@ -399,6 +402,45 @@ export default function App() {
       alert("Error deleting document.");
       console.error(err);
     }
+  };
+
+  // Image Upload helper (compress and convert to base64)
+  const handleImageUpload = (e, callback) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert("Please upload an image file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height = Math.floor(height * (MAX_WIDTH / width));
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress image to JPEG at 80% quality
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        callback(dataUrl);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   // Open Add CRUD form
@@ -620,7 +662,7 @@ export default function App() {
           <div 
             className="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none z-0"
             style={{ 
-              backgroundImage: 'url(/workstation_bg.png)'
+              backgroundImage: `url(${profileSettings.homeImage || '/workstation_bg.png'})`
             }}
           />
           {/* Dark overlay */}
@@ -641,7 +683,7 @@ export default function App() {
                 HAMMAD <br /> ZAKARIA
               </h1>
               <p className="text-[10px] sm:text-xs md:text-sm font-light tracking-widest text-gray-400 uppercase max-w-xl">
-                Network Engineer & Cloud Specialist
+                {lang === 'id' ? (profileSettings.headline_id || 'Network Engineer & Cloud Specialist') : (profileSettings.headline_en || 'Network Engineer & Cloud Specialist')}
               </p>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6">
                 <button 
@@ -688,7 +730,7 @@ export default function App() {
                 <div className="relative group max-w-[120px] sm:max-w-xs md:max-w-md w-full aspect-[3/4] border border-gray-800 p-2 overflow-hidden bg-black mx-auto">
                   <div 
                     className="w-full h-full bg-cover bg-center grayscale contrast-125 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                    style={{ backgroundImage: 'url(/profile_portrait.png)' }}
+                    style={{ backgroundImage: `url(${profileSettings.aboutImage || '/profile_portrait.png'})` }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-darkBg/80 via-transparent to-transparent opacity-85 pointer-events-none" />
                   <div className="absolute top-4 left-4 w-4 h-[1px] bg-white/40" />
@@ -708,24 +750,34 @@ export default function App() {
                 </h2>
                 <p className="text-xs sm:text-lg md:text-xl font-light text-textMuted leading-relaxed max-w-2xl select-text">
                   {lang === 'id' 
-                    ? "Seorang junior network engineer dan cloud engineer. Spesialisasi dalam infrastruktur jaringan Mikrotik, Cisco, dan deployment AWS dengan fokus pada presisi dan keamanan data."
-                    : "A junior network engineer and cloud engineer. Specializing in MikroTik network infrastructure, Cisco routing, and AWS cloud deployment with a focus on data security and precision."}
+                    ? (profileSettings.about_id || "Seorang junior network engineer dan cloud engineer. Spesialisasi dalam infrastruktur jaringan Mikrotik, Cisco, dan deployment AWS dengan fokus pada presisi dan keamanan data.")
+                    : (profileSettings.about_en || "A junior network engineer and cloud engineer. Specializing in MikroTik network infrastructure, Cisco routing, and AWS cloud deployment with a focus on data security and precision.")}
                 </p>
 
                 {/* Social Media Links */}
                 <div className="pt-3 sm:pt-5 flex items-center justify-center md:justify-start space-x-5">
-                  <a href="https://www.linkedin.com/in/hammadzakaria" target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
+                  <a href={profileSettings.linkedin || '#'} target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                     <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">LinkedIn</span>
                   </a>
-                  <a href="https://www.instagram.com/hammadzakaria" target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                    <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">Instagram</span>
-                  </a>
-                  <a href="https://www.youtube.com/@hammadzakaria" target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                    <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">YouTube</span>
-                  </a>
+                  {profileSettings.github && (
+                    <a href={profileSettings.github} target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.814 1.102.814 2.222v3.293c0 .322.218.694.825.576C20.565 21.795 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                      <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">GitHub</span>
+                    </a>
+                  )}
+                  {profileSettings.website && (
+                    <a href={profileSettings.website} target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.985 8.5h-3.41c-.183-1.644-.658-3.125-1.34-4.323C16.143 4.966 17.84 6.452 18.985 8.5zM12 2.052c1.234 1.543 2.102 3.65 2.457 5.948H9.543C9.898 5.702 10.766 3.595 12 2.052zm-3.765 2.125c-.682 1.198-1.157 2.679-1.34 4.323H3.015c1.145-2.048 2.842-3.534 4.75-4.323zM2.375 10.5h4.153c-.053.486-.088.985-.088 1.5s.035 1.014.088 1.5H2.375c-.218-.954-.375-1.954-.375-3s.157-2.046.375-3zm.64 5h3.88c.183 1.644.658 3.125 1.34 4.323-1.908-.789-3.605-2.275-4.75-4.323zm6.528 6.448c-1.234-1.543-2.102-3.65-2.457-5.948h4.914c-.355 2.298-1.223 4.405-2.457 5.948zm3.765-2.125c.682-1.198 1.157-2.679 1.34-4.323h3.88c-1.145 2.048-2.842 3.534-4.75 4.323zm2.539-6.323h-4.153c.053-.486.088-.985.088-1.5s-.035-1.014-.088-1.5h4.153c.218.954.375 1.954.375 3s-.157 2.046-.375 3z"/></svg>
+                      <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">Website</span>
+                    </a>
+                  )}
+                  {profileSettings.youtube && (
+                    <a href={profileSettings.youtube} target="_blank" rel="noopener noreferrer" className="group flex items-center space-x-2 text-gray-500 hover:text-white transition-colors duration-300">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                      <span className="text-[10px] font-semibold tracking-widest uppercase hidden sm:inline">YouTube</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -776,10 +828,25 @@ export default function App() {
 
                 {/* Certifications (White Header) */}
                 <div className="space-y-6 border-t border-gray-900 pt-6">
-                  <h3 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight flex items-center space-x-2">
-                    <Award size={22} className="text-white" />
-                    <span>{t('certifications')}</span>
-                  </h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight flex items-center space-x-2">
+                      <Award size={22} className="text-white" />
+                      <span>{t('certifications')}</span>
+                    </h3>
+                    {certificates.length > certPerPage && (
+                      <div className="flex space-x-1">
+                        {Array.from({ length: Math.ceil(certificates.length / certPerPage) }).map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => goCertSlide(i)}
+                            className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${certSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="overflow-hidden relative">
                     <div 
@@ -852,13 +919,28 @@ export default function App() {
                   
                   {/* Experiences timeline items - smooth slide pagination */}
                   <div className="space-y-6">
-                    <div className="relative flex items-center">
-                      <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                        <Briefcase size={8} className="text-white" />
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                          <Briefcase size={8} className="text-white" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
+                          {t('experiences')}
+                        </h3>
                       </div>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
-                        {t('experiences')}
-                      </h3>
+                      {experiences.length > expPerPage && (
+                        <div className="flex space-x-1">
+                          {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => goExpSlide(i)}
+                              className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${expSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     
                     {/* Experiences content with smooth slide transition */}
@@ -883,32 +965,34 @@ export default function App() {
                           </div>
                         ))}
                       </div>
-                      {/* Experiences internal pagination */}
-                      {experiences.length > expPerPage && (
-                        <div className="flex justify-center md:justify-end items-center space-x-2 mt-4">
-                          {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
+                      {/* Experiences internal pagination moved to top right */}
+                    </div>
+                  </div>
+
+                  {/* Education timeline items */}
+                  <div className="space-y-6 border-t border-gray-900/50 pt-6">
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                          <BookOpen size={8} className="text-white" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
+                          {t('education')}
+                        </h3>
+                      </div>
+                      {education.length > eduPerPage && (
+                        <div className="flex space-x-1">
+                          {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
                             <button
                               key={i}
-                              onClick={() => goExpSlide(i)}
-                              className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${expSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                              onClick={() => goEduSlide(i)}
+                              className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${eduSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
                             >
                               {i + 1}
                             </button>
                           ))}
                         </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Education timeline items */}
-                  <div className="space-y-6 border-t border-gray-900/50 pt-6">
-                    <div className="relative flex items-center">
-                      <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                        <BookOpen size={8} className="text-white" />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
-                        {t('education')}
-                      </h3>
                     </div>
                     
                     {/* Education content with smooth slide transition */}
@@ -930,20 +1014,7 @@ export default function App() {
                           </div>
                         ))}
                       </div>
-                      {/* Education internal pagination */}
-                      {education.length > eduPerPage && (
-                        <div className="flex justify-center md:justify-end items-center space-x-2 mt-4">
-                          {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => goEduSlide(i)}
-                              className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${eduSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
-                            >
-                              {i + 1}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      {/* Education internal pagination moved to top right */}
                     </div>
                   </div>
 
@@ -970,13 +1041,28 @@ export default function App() {
                     
                     {/* Experiences timeline items */}
                     <div className="space-y-6">
-                      <div className="relative flex items-center">
-                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                          <Briefcase size={8} className="text-white" />
+                      <div className="relative flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                            <Briefcase size={8} className="text-white" />
+                          </div>
+                          <h3 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight">
+                            {t('experiences')}
+                          </h3>
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight">
-                          {t('experiences')}
-                        </h3>
+                        {experiences.length > expPerPage && (
+                          <div className="flex space-x-1">
+                            {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => goExpSlide(i)}
+                                className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${expSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
+                              >
+                                {i + 1}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       <div className="overflow-hidden relative">
@@ -997,31 +1083,34 @@ export default function App() {
                             </div>
                           ))}
                         </div>
-                        {experiences.length > expPerPage && (
-                          <div className="flex justify-center items-center space-x-2 mt-4">
-                            {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
+                        {/* Experiences mobile pagination moved to top right */}
+                      </div>
+                    </div>
+
+                    {/* Education timeline items */}
+                    <div className="space-y-6 border-t border-gray-900/50 pt-6">
+                      <div className="relative flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                            <BookOpen size={8} className="text-white" />
+                          </div>
+                          <h3 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight">
+                            {t('education')}
+                          </h3>
+                        </div>
+                        {education.length > eduPerPage && (
+                          <div className="flex space-x-1">
+                            {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
                               <button
                                 key={i}
-                                onClick={() => goExpSlide(i)}
-                                className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${expSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                                onClick={() => goEduSlide(i)}
+                                className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${eduSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
                               >
                                 {i + 1}
                               </button>
                             ))}
                           </div>
                         )}
-                      </div>
-                    </div>
-
-                    {/* Education timeline items */}
-                    <div className="space-y-6 border-t border-gray-900/50 pt-6">
-                      <div className="relative flex items-center">
-                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                          <BookOpen size={8} className="text-white" />
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-extrabold text-white uppercase tracking-tight">
-                          {t('education')}
-                        </h3>
                       </div>
                       
                       <div className="overflow-hidden relative">
@@ -1039,19 +1128,7 @@ export default function App() {
                             </div>
                           ))}
                         </div>
-                        {education.length > eduPerPage && (
-                          <div className="flex justify-center items-center space-x-2 mt-4">
-                            {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => goEduSlide(i)}
-                                className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${eduSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
-                              >
-                                {i + 1}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        {/* Education mobile pagination moved to top right */}
                       </div>
                     </div>
 
@@ -1094,8 +1171,14 @@ export default function App() {
                       key={proj.id} 
                       className="w-full md:w-1/3 flex-shrink-0 px-2 sm:px-4"
                     >
-                      <div className="group relative border border-gray-800/80 bg-darkBg/20 hover:bg-darkBg/60 p-5 sm:p-8 flex flex-col justify-between h-60 sm:h-72 transition-all duration-300 hover:border-gray-600">
-                        <div className="space-y-3 sm:space-y-4">
+                      <div className="group relative border border-gray-800/80 bg-darkBg/20 hover:bg-darkBg/60 p-5 sm:p-8 flex flex-col justify-between h-60 sm:h-72 transition-all duration-300 hover:border-gray-600 overflow-hidden">
+                        {proj.image && (
+                          <>
+                            <div className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-40 transition-opacity duration-500" style={{ backgroundImage: `url(${proj.image})` }} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-darkBg via-darkBg/90 to-transparent" />
+                          </>
+                        )}
+                        <div className="space-y-3 sm:space-y-4 relative z-10">
                           <span className="text-[9px] font-mono tracking-widest text-accentCyan uppercase block">
                             {getField(proj, 'category')}
                           </span>
@@ -1107,7 +1190,7 @@ export default function App() {
                           </p>
                         </div>
                         
-                        <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-900 group-hover:border-gray-800 transition-colors">
+                        <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-900 group-hover:border-gray-800 transition-colors relative z-10">
                           <div className="flex space-x-2 overflow-hidden">
                             {proj.technologies && proj.technologies.slice(0, isMobile ? 2 : 3).map((tech, i) => (
                               <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
@@ -1308,7 +1391,7 @@ export default function App() {
               value={formMessage}
               onChange={(e) => setFormMessage(e.target.value)}
               required
-              placeholder="Jelaskan kebutuhan infrastruktur jaringan atau kebutuhan deployment cloud Anda..."
+              placeholder="Jelaskan kebutuhan anda..."
               className="w-full bg-darkCard border border-gray-800 px-4 py-3 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white transition-colors resize-none"
             />
           </div>
@@ -1405,8 +1488,9 @@ export default function App() {
 
           <div className="pt-4 border-t border-gray-900 flex justify-between">
             <a 
-              href="#"
-              onClick={(e) => { e.preventDefault(); alert("Resume PDF download simulated."); }}
+              href={profileSettings.cvLink || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-4 py-2 bg-white text-black text-[10px] font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors"
             >
               Download PDF
@@ -1487,6 +1571,7 @@ export default function App() {
 
                 <nav className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
                   {[
+                    { id: 'profile', label: 'Profile' },
                     { id: 'projects', label: 'Projects' },
                     { id: 'skills', label: 'Skills' },
                     { id: 'certificates', label: 'Certs' },
@@ -1519,7 +1604,79 @@ export default function App() {
 
             <main className="flex-1 bg-[#0c0e12] overflow-y-auto flex flex-col justify-between">
               <div className="p-8 md:p-12 max-w-5xl w-full">
-                {!editingItem ? (
+                {adminTab === 'profile' ? (
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    await saveSettings(profileSettings);
+                    alert("Profile Settings Saved!");
+                  }} className="space-y-6 max-w-xl bg-[#141820] border border-[#1e2530] p-8 rounded shadow-2xl">
+                    <h4 className="text-xs font-bold tracking-widest text-accentCyan uppercase">Profile & Global Settings</h4>
+                    
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-gray-400 uppercase tracking-widest">CV Download Link</label>
+                      <input type="text" required value={profileSettings.cvLink || ''} onChange={(e) => setProfileSettings({...profileSettings, cvLink: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Headline (ID)</label>
+                        <input type="text" required value={profileSettings.headline_id || ''} onChange={(e) => setProfileSettings({...profileSettings, headline_id: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Headline (EN)</label>
+                        <input type="text" required value={profileSettings.headline_en || ''} onChange={(e) => setProfileSettings({...profileSettings, headline_en: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-gray-400 uppercase tracking-widest">About Text (ID)</label>
+                      <textarea rows={4} required value={profileSettings.about_id || ''} onChange={(e) => setProfileSettings({...profileSettings, about_id: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan resize-none" />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-gray-400 uppercase tracking-widest">About Text (EN)</label>
+                      <textarea rows={4} required value={profileSettings.about_en || ''} onChange={(e) => setProfileSettings({...profileSettings, about_en: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan resize-none" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">LinkedIn URL</label>
+                        <input type="text" required value={profileSettings.linkedin || ''} onChange={(e) => setProfileSettings({...profileSettings, linkedin: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Website URL</label>
+                        <input type="text" required value={profileSettings.website || ''} onChange={(e) => setProfileSettings({...profileSettings, website: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Github URL</label>
+                        <input type="text" required value={profileSettings.github || ''} onChange={(e) => setProfileSettings({...profileSettings, github: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">YouTube URL</label>
+                        <input type="text" required value={profileSettings.youtube || ''} onChange={(e) => setProfileSettings({...profileSettings, youtube: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Home Background Image</label>
+                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (dataUrl) => setProfileSettings({...profileSettings, homeImage: dataUrl}))} className="w-full text-xs text-gray-400" />
+                        {profileSettings.homeImage && <img src={profileSettings.homeImage} alt="Home preview" className="mt-2 w-full h-20 object-cover border border-[#2e394b]" />}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">About Profile Image</label>
+                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (dataUrl) => setProfileSettings({...profileSettings, aboutImage: dataUrl}))} className="w-full text-xs text-gray-400" />
+                        {profileSettings.aboutImage && <img src={profileSettings.aboutImage} alt="About preview" className="mt-2 w-full h-20 object-cover border border-[#2e394b]" />}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#1e2530] flex space-x-4">
+                      <button type="submit" className="flex-1 py-3 bg-accentCyan text-black text-xs font-bold tracking-widest uppercase hover:bg-[#0284c7] transition-colors rounded">
+                        Save Profile Settings
+                      </button>
+                    </div>
+                  </form>
+                ) : !editingItem ? (
                   <div className="space-y-6">
                     <div className="flex justify-between items-center border-b border-[#1e2530] pb-4">
                       <h4 className="text-xs font-bold tracking-widest text-gray-400 uppercase">
@@ -1629,8 +1786,9 @@ export default function App() {
                             <input type="text" value={editingItem.link} onChange={(e) => setEditingItem({...editingItem, link: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[9px] text-gray-400 uppercase tracking-widest">Image URL / Path</label>
-                            <input type="text" value={editingItem.image} onChange={(e) => setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                            <label className="text-[9px] text-gray-400 uppercase tracking-widest">Image Upload</label>
+                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (dataUrl) => setEditingItem({...editingItem, image: dataUrl}))} className="w-full text-xs text-gray-400" />
+                            {editingItem.image && <img src={editingItem.image} alt="Project Preview" className="mt-2 w-full h-20 object-cover border border-[#2e394b]" />}
                           </div>
                         </div>
                       </>
