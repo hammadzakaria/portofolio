@@ -102,7 +102,7 @@ const DICTIONARY = {
     timeline: "Linimasa",
     certifications: "Sertifikasi",
     education: "Pendidikan",
-    experiences: "Pengalaman Kerja",
+    experiences: "Pengalaman",
     readMore: "Selengkapnya",
     backToPorto: "Kembali ke Porto",
     inquiryChannel: "Hubungi Saya",
@@ -245,7 +245,7 @@ export default function App() {
         }
       });
     }, {
-      threshold: 0.55 // Trigger when section is mostly visible
+      threshold: 0.4 // Lowered threshold to ensure triggering on mobile browsers with bottom bars
     });
 
     sectionsList.forEach(sec => observer.observe(sec));
@@ -735,7 +735,7 @@ export default function App() {
         {/* SECTION 3: RESUME PAGE */}
         <section 
           id="section-resume"
-          className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-start md:justify-center px-6 sm:px-12 md:px-24 bg-darkBg pt-16 md:pt-0"
+          className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-center px-6 sm:px-12 md:px-24 bg-darkBg"
         >
           <div 
             className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
@@ -958,7 +958,7 @@ export default function App() {
         {isMobile && (
           <section 
             id="section-resume-part2"
-            className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-start px-6 sm:px-12 bg-darkBg pt-16"
+            className="page-section-snap h-screen w-full snap-start relative flex flex-col justify-center px-6 sm:px-12 bg-darkBg"
           >
             <div 
               className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
