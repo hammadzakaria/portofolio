@@ -55,38 +55,56 @@ const fallbackSkills = [
 ];
 
 const fallbackCertificates = [
-  { id: 'cert-1', title: 'MTCNA', issuer: 'Mikrotik', year: '2023', link: 'https://mikrotik.com/training/certificates/c366893cf57d80aa49fa' },
-  { id: 'cert-2', title: 'MTCRE', issuer: 'Mikrotik', year: '2024', link: 'https://mikrotik.com/training/certificates/c395209c0b6b3d025e78' }
+  { id: 'cert-1', title: 'MTCNA — MikroTik Certified Network Associate', issuer: 'MikroTik', year: '2023', link: '#' },
+  { id: 'cert-2', title: 'MTCRE — MikroTik Certified Routing Engineer', issuer: 'MikroTik', year: '2024', link: '#' }
 ];
 
 const fallbackEducation = [
   { 
     id: 'edu-1', 
-    institution: 'SMK IDN Boarding School', 
-    degree_id: 'TKJ (Teknik Komputer Jaringan)', 
-    degree_en: 'Computer & Network Engineering',
-    duration: '2017 - 2020' 
+    institution: 'SMK IDN Boarding School Solo', 
+    degree_id: 'Teknik Komputer dan Jaringan (TKJ)', 
+    degree_en: 'Computer and Network Engineering (TKJ)',
+    duration: '2024 - Sekarang' 
   }
 ];
 
 const fallbackExperiences = [
   {
     id: 'exp-1',
-    role_id: 'Network Engineer Intern',
-    role_en: 'Network Engineer Intern',
-    company: 'PT Solusi Jaringan Nusantara',
-    duration: '2019',
-    description_id: 'Melakukan monitoring perangkat Cisco dan Mikrotik, troubleshooting kendala routing OSPF sederhana, dan crimping kabel fiber optik.',
-    description_en: 'Monitored Cisco and MikroTik devices, troubleshooted basic OSPF routing issues, and performed fiber optic cabling/crimping.'
+    role_id: 'IT & Network Support — Magang',
+    role_en: 'IT & Network Support — Internship',
+    company: 'CV. Faham Medika (Emhacare)',
+    duration: '2026 - Now',
+    description_id: '• Mengkonfigurasi perangkat MikroTik untuk pembagian bandwith dan hotspot login.\n• Menambahkan Access Point untuk area kantor yang tidak terjangkau internet.\n• Melakukan perbaikan dan update website perusahaan menggunakan Wordpress.',
+    description_en: '• Configured MikroTik devices for bandwidth distribution and hotspot login.\n• Added Access Points for office areas with no internet coverage.\n• Performed maintenance and updates for the company website using WordPress.'
   },
   {
     id: 'exp-2',
-    role_id: 'Freelance Cloud Deployment Assistant',
-    role_en: 'Freelance Cloud Deployment Assistant',
-    company: 'Upwork / Cloud Projects',
-    duration: '2020 - Present',
-    description_id: 'Membantu dalam provisioning AWS EC2, konfigurasi security groups, setup Route53 DNS, dan static web hosting pada Amazon S3.',
-    description_en: 'Assisted in provisioning AWS EC2 instances, configuring security groups, setting up Route53 DNS, and hosting static websites on Amazon S3.'
+    role_id: 'Uji Kompetensi — Network Infrastructure Project',
+    role_en: 'Competency Test — Network Infrastructure Project',
+    company: 'SMK IDN Boarding School Solo',
+    duration: '2026',
+    description_id: '• Mengkonfigurasi infrastruktur jaringan menggunakan perangkat fisik MikroTik dan Cisco.\n• Menerapkan teknologi VLAN, EtherChannel, OSPF, GRE Tunnel, DHCP, dan NAT.\n• Melakukan troubleshooting dan analisis konektivitas antar jaringan.',
+    description_en: '• Configured network infrastructure using physical MikroTik and Cisco devices.\n• Implemented VLAN, EtherChannel, OSPF, GRE Tunnel, DHCP, and NAT technologies.\n• Performed troubleshooting and network connectivity analysis.'
+  },
+  {
+    id: 'exp-3',
+    role_id: 'Networking Competition Participant',
+    role_en: 'Networking Competition Participant',
+    company: 'SMK IDN Boarding School Solo',
+    duration: '2025',
+    description_id: '• ATSWA NESA Jombang — Kompetisi bidang Subnetting & Network Administration (MikroTik).\n• Techtopia Online Competition — Kompetisi simulasi jaringan Cisco Packet Tracer.',
+    description_en: '• ATSWA NESA Jombang — Subnetting & Network Administration Competition (MikroTik).\n• Techtopia Online Competition — Cisco Packet Tracer network simulation competition.'
+  },
+  {
+    id: 'exp-4',
+    role_id: 'IT Trainer — IDN Mengajar',
+    role_en: 'IT Trainer — IDN Teaching Program',
+    company: 'SMK IDN Boarding School Solo',
+    duration: '2025',
+    description_id: '• Mengajarkan konsep subnetting dan network fundamental pada kegiatan IT Camp IDN Solo.\n• Menyampaikan materi pengenalan dasar teknologi Artificial Intelligence di SMAN 1 Nawangan.',
+    description_en: '• Taught subnetting concepts and network fundamentals at the IDN Solo IT Camp.\n• Delivered introductory material on basic Artificial Intelligence technology at SMAN 1 Nawangan.'
   }
 ];
 
@@ -131,7 +149,7 @@ const fallbackProjects = [
 
 // Helper to get local storage if configured or return defaults
 const getLocalData = (key, defaults) => {
-  const stored = localStorage.getItem(`hz_portfolio_${key}`);
+  const stored = localStorage.getItem(`hz_portfolio_v2_${key}`);
   if (stored) {
     try { return JSON.parse(stored); } catch (e) { return defaults; }
   }
@@ -139,7 +157,7 @@ const getLocalData = (key, defaults) => {
 };
 
 const setLocalData = (key, data) => {
-  localStorage.setItem(`hz_portfolio_${key}`, JSON.stringify(data));
+  localStorage.setItem(`hz_portfolio_v2_${key}`, JSON.stringify(data));
 };
 
 // Data loading functions

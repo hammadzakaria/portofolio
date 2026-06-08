@@ -877,7 +877,7 @@ export default function App() {
                               <span className="text-[8px] sm:text-[9px] font-mono text-gray-500">{exp.duration}</span>
                             </div>
                             <p className="text-[9px] sm:text-[10px] text-accentCyan uppercase tracking-widest font-semibold">{exp.company}</p>
-                            <p className="text-[10px] sm:text-xs text-textMuted font-light leading-relaxed select-text">
+                            <p className="text-[10px] sm:text-xs text-textMuted font-light leading-relaxed select-text whitespace-pre-wrap">
                               {getField(exp, 'description')}
                             </p>
                           </div>
@@ -991,7 +991,7 @@ export default function App() {
                                 <span className="text-[8px] sm:text-[9px] font-mono text-gray-500">{exp.duration}</span>
                               </div>
                               <p className="text-[9px] sm:text-[10px] text-accentCyan uppercase tracking-widest font-semibold">{exp.company}</p>
-                              <p className="text-[10px] sm:text-xs text-textMuted font-light leading-relaxed select-text">
+                              <p className="text-[10px] sm:text-xs text-textMuted font-light leading-relaxed select-text whitespace-pre-wrap">
                                 {getField(exp, 'description')}
                               </p>
                             </div>
