@@ -629,7 +629,7 @@ export default function App() {
           <div className="absolute inset-0 bg-gradient-to-r from-darkBg via-darkBg/80 to-transparent z-[2] pointer-events-none" />
 
           <div 
-            className={`max-w-[1500px] mx-auto w-full transition-all duration-1000 ease-in-out ${
+            className={`max-w-[1500px] mx-auto w-full relative z-10 transition-all duration-1000 ease-in-out ${
               activeSectionId === 'section-home' ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
