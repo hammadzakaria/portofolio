@@ -169,23 +169,19 @@ export default function App() {
   const [expSlideIdx, setExpSlideIdx] = useState(0);
   const [expAnimating, setExpAnimating] = useState(false);
   const [expDirection, setExpDirection] = useState('next');
-  const [expPerPage, setExpPerPage] = useState(2);
+  const expPerPage = 3;
 
   const [eduSlideIdx, setEduSlideIdx] = useState(0);
   const [eduAnimating, setEduAnimating] = useState(false);
   const [eduDirection, setEduDirection] = useState('next');
-  const [eduPerPage, setEduPerPage] = useState(2);
+  const eduPerPage = 2;
 
   const [certSlideIdx, setCertSlideIdx] = useState(0);
   const [certAnimating, setCertAnimating] = useState(false);
   const [certDirection, setCertDirection] = useState('next');
-  const [certPerPage, setCertPerPage] = useState(4);
+  const certPerPage = 4;
 
-  useEffect(() => {
-    setExpPerPage(isMobile ? 1 : 2);
-    setEduPerPage(isMobile ? 1 : 2);
-    setCertPerPage(isMobile ? 1 : 4);
-  }, [isMobile]);
+  const [resumeMobilePage, setResumeMobilePage] = useState(0);
   
   // Admin Mode states
   const [adminMode, setAdminMode] = useState(false);
@@ -438,12 +434,12 @@ export default function App() {
   };
 
   // Smooth experience slide navigation
-  const goExpSlide = useCallback((dir) => {
+  const goExpSlide = useCallback((target) => {
     if (expAnimating) return;
     const maxPage = Math.ceil(experiences.length / expPerPage) - 1;
-    const nextIdx = dir === 'next' ? Math.min(expSlideIdx + 1, maxPage) : Math.max(expSlideIdx - 1, 0);
+    let nextIdx = target === 'next' ? Math.min(expSlideIdx + 1, maxPage) : target === 'prev' ? Math.max(expSlideIdx - 1, 0) : target;
     if (nextIdx === expSlideIdx) return;
-    setExpDirection(dir);
+    setExpDirection(nextIdx > expSlideIdx ? 'next' : 'prev');
     setExpAnimating(true);
     setTimeout(() => {
       setExpSlideIdx(nextIdx);
@@ -452,12 +448,12 @@ export default function App() {
   }, [expAnimating, expSlideIdx, experiences.length, expPerPage]);
 
   // Smooth education slide navigation
-  const goEduSlide = useCallback((dir) => {
+  const goEduSlide = useCallback((target) => {
     if (eduAnimating) return;
     const maxPage = Math.ceil(education.length / eduPerPage) - 1;
-    const nextIdx = dir === 'next' ? Math.min(eduSlideIdx + 1, maxPage) : Math.max(eduSlideIdx - 1, 0);
+    let nextIdx = target === 'next' ? Math.min(eduSlideIdx + 1, maxPage) : target === 'prev' ? Math.max(eduSlideIdx - 1, 0) : target;
     if (nextIdx === eduSlideIdx) return;
-    setEduDirection(dir);
+    setEduDirection(nextIdx > eduSlideIdx ? 'next' : 'prev');
     setEduAnimating(true);
     setTimeout(() => {
       setEduSlideIdx(nextIdx);
@@ -466,12 +462,12 @@ export default function App() {
   }, [eduAnimating, eduSlideIdx, education.length, eduPerPage]);
 
   // Smooth certification slide navigation
-  const goCertSlide = useCallback((dir) => {
+  const goCertSlide = useCallback((target) => {
     if (certAnimating) return;
     const maxPage = Math.ceil(certificates.length / certPerPage) - 1;
-    const nextIdx = dir === 'next' ? Math.min(certSlideIdx + 1, maxPage) : Math.max(certSlideIdx - 1, 0);
+    let nextIdx = target === 'next' ? Math.min(certSlideIdx + 1, maxPage) : target === 'prev' ? Math.max(certSlideIdx - 1, 0) : target;
     if (nextIdx === certSlideIdx) return;
-    setCertDirection(dir);
+    setCertDirection(nextIdx > certSlideIdx ? 'next' : 'prev');
     setCertAnimating(true);
     setTimeout(() => {
       setCertSlideIdx(nextIdx);
@@ -741,10 +737,10 @@ export default function App() {
               activeIdx === 2 ? 'opacity-100 blur-none scale-100 translate-y-0' : 'opacity-0 blur-xl scale-98 translate-y-4'
             }`}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12 md:gap-24 md:h-auto py-2 md:py-0 pb-20 md:pb-0">
+            <div className="md:grid md:grid-cols-2 md:gap-24 md:h-auto py-2 md:py-0 pb-20 md:pb-0">
               
               {/* Left Column */}
-              <div className="space-y-12">
+              <div className={`space-y-12 ${isMobile && resumeMobilePage !== 0 ? 'hidden' : 'block'}`}>
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <span className="text-[10px] sm:text-xs font-bold tracking-mega text-gray-500 uppercase block">
@@ -775,37 +771,10 @@ export default function App() {
 
                 {/* Certifications (White Header) */}
                 <div className="space-y-6 border-t border-gray-900 pt-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight flex items-center space-x-2">
-                      <Award size={22} className="text-white" />
-                      <span>{t('certifications')}</span>
-                    </h3>
-                    {certificates.length > certPerPage && (
-                      <div className="flex items-center space-x-2 bg-darkCard/50 p-1 rounded-lg border border-gray-800">
-                        <button
-                          onClick={() => goCertSlide('prev')}
-                          disabled={certSlideIdx === 0}
-                          className={`p-1.5 rounded transition-colors focus:outline-none ${
-                            certSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
-                          }`}
-                        >
-                          <ChevronLeft size={14} />
-                        </button>
-                        <span className="text-xs font-bold text-gray-300 min-w-[36px] text-center">
-                          {certSlideIdx + 1} / {Math.ceil(certificates.length / certPerPage)}
-                        </span>
-                        <button
-                          onClick={() => goCertSlide('next')}
-                          disabled={certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1}
-                          className={`p-1.5 rounded transition-colors focus:outline-none ${
-                            certSlideIdx >= Math.ceil(certificates.length / certPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
-                          }`}
-                        >
-                          <ChevronRight size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <h3 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight flex items-center space-x-2">
+                    <Award size={22} className="text-white" />
+                    <span>{t('certifications')}</span>
+                  </h3>
                   
                   <div className="overflow-hidden relative">
                     <div 
@@ -854,52 +823,37 @@ export default function App() {
                         );
                       })}
                     </div>
+                    {/* Certificates internal pagination (Desktop) */}
+                    {!isMobile && certificates.length > certPerPage && (
+                      <div className="flex justify-end items-center space-x-2 mt-4">
+                        {Array.from({ length: Math.ceil(certificates.length / certPerPage) }).map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => goCertSlide(i)}
+                            className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${certSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Right Column */}
-              <div className="space-y-12">
+              <div className={`space-y-12 ${isMobile && resumeMobilePage !== 1 ? 'hidden' : 'block'}`}>
                 <div className="relative border-l border-gray-800 pl-6 space-y-10 ml-2">
                   
                   {/* Experiences timeline items - smooth slide pagination */}
                   <div className="space-y-6">
-                    <div className="relative flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                          <Briefcase size={8} className="text-white" />
-                        </div>
-                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
-                          {t('experiences')}
-                        </h3>
+                    <div className="relative flex items-center">
+                      <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                        <Briefcase size={8} className="text-white" />
                       </div>
-
-                      {/* Slide controls */}
-                      {experiences.length > expPerPage && (
-                        <div className="flex items-center space-x-2 bg-darkCard/50 p-1 rounded-lg border border-gray-800">
-                          <button
-                            onClick={() => goExpSlide('prev')}
-                            disabled={expSlideIdx === 0}
-                            className={`p-1.5 rounded transition-colors focus:outline-none ${
-                              expSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
-                            }`}
-                          >
-                            <ChevronLeft size={14} />
-                          </button>
-                          <span className="text-xs font-bold text-gray-300 min-w-[36px] text-center">
-                            {expSlideIdx + 1} / {Math.ceil(experiences.length / expPerPage)}
-                          </span>
-                          <button
-                            onClick={() => goExpSlide('next')}
-                            disabled={expSlideIdx >= Math.ceil(experiences.length / expPerPage) - 1}
-                            className={`p-1.5 rounded transition-colors focus:outline-none ${
-                              expSlideIdx >= Math.ceil(experiences.length / expPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
-                            }`}
-                          >
-                            <ChevronRight size={14} />
-                          </button>
-                        </div>
-                      )}
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
+                        {t('experiences')}
+                      </h3>
                     </div>
                     
                     {/* Experiences content with smooth slide transition */}
@@ -924,47 +878,32 @@ export default function App() {
                           </div>
                         ))}
                       </div>
+                      {/* Experiences internal pagination (Desktop) */}
+                      {!isMobile && experiences.length > expPerPage && (
+                        <div className="flex justify-end items-center space-x-2 mt-4">
+                          {Array.from({ length: Math.ceil(experiences.length / expPerPage) }).map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => goExpSlide(i)}
+                              className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${expSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Education timeline items */}
                   <div className="space-y-6 border-t border-gray-900/50 pt-6">
-                    <div className="relative flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
-                          <BookOpen size={8} className="text-white" />
-                        </div>
-                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
-                          {t('education')}
-                        </h3>
+                    <div className="relative flex items-center">
+                      <div className="absolute -left-[32px] top-1/2 -translate-y-1/2 bg-darkBg border border-gray-800 w-4 h-4 rounded-full flex items-center justify-center">
+                        <BookOpen size={8} className="text-white" />
                       </div>
-
-                      {/* Slide controls */}
-                      {education.length > eduPerPage && (
-                        <div className="flex items-center space-x-2 bg-darkCard/50 p-1 rounded-lg border border-gray-800">
-                          <button
-                            onClick={() => goEduSlide('prev')}
-                            disabled={eduSlideIdx === 0}
-                            className={`p-1.5 rounded transition-colors focus:outline-none ${
-                              eduSlideIdx === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
-                            }`}
-                          >
-                            <ChevronLeft size={14} />
-                          </button>
-                          <span className="text-xs font-bold text-gray-300 min-w-[36px] text-center">
-                            {eduSlideIdx + 1} / {Math.ceil(education.length / eduPerPage)}
-                          </span>
-                          <button
-                            onClick={() => goEduSlide('next')}
-                            disabled={eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1}
-                            className={`p-1.5 rounded transition-colors focus:outline-none ${
-                              eduSlideIdx >= Math.ceil(education.length / eduPerPage) - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-[#1a1f2b] hover:bg-gray-700 text-white'
-                            }`}
-                          >
-                            <ChevronRight size={14} />
-                          </button>
-                        </div>
-                      )}
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white uppercase tracking-tight">
+                        {t('education')}
+                      </h3>
                     </div>
                     
                     {/* Education content with smooth slide transition */}
@@ -986,12 +925,33 @@ export default function App() {
                           </div>
                         ))}
                       </div>
+                      {/* Education internal pagination (Desktop) */}
+                      {!isMobile && education.length > eduPerPage && (
+                        <div className="flex justify-end items-center space-x-2 mt-4">
+                          {Array.from({ length: Math.ceil(education.length / eduPerPage) }).map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => goEduSlide(i)}
+                              className={`w-6 h-6 rounded text-[10px] font-bold transition-colors ${eduSlideIdx === i ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-500 hover:text-white'}`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                 </div>
               </div>
 
+              {/* Global Mobile Pagination */}
+              {isMobile && (
+                <div className="flex justify-center items-center space-x-3 mt-4 w-full md:hidden">
+                  <button onClick={() => setResumeMobilePage(0)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${resumeMobilePage === 0 ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-400 hover:text-white'}`}>1</button>
+                  <button onClick={() => setResumeMobilePage(1)} className={`w-8 h-8 rounded text-xs font-bold transition-colors ${resumeMobilePage === 1 ? 'bg-accentCyan text-black' : 'bg-darkCard border border-gray-800 text-gray-400 hover:text-white'}`}>2</button>
+                </div>
+              )}
             </div>
           </div>
         </section>
