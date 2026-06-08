@@ -172,7 +172,7 @@ export default function App() {
   const [expSlideIdx, setExpSlideIdx] = useState(0);
   const [expAnimating, setExpAnimating] = useState(false);
   const [expDirection, setExpDirection] = useState('next');
-  const expPerPage = 4;
+  const expPerPage = isMobile ? 3 : 4;
 
   const [eduSlideIdx, setEduSlideIdx] = useState(0);
   const [eduAnimating, setEduAnimating] = useState(false);
@@ -840,10 +840,9 @@ export default function App() {
                           <button
                             key={i}
                             onClick={() => goCertSlide(i)}
-                            className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${certSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
-                          >
-                            {i + 1}
-                          </button>
+                            className={`w-1.5 h-1.5 rounded-full transition-colors ${certSlideIdx === i ? 'bg-gray-400' : 'bg-gray-800 hover:bg-gray-600'}`}
+                            aria-label={`Page ${i + 1}`}
+                          />
                         ))}
                       </div>
                     )}
@@ -859,7 +858,7 @@ export default function App() {
                     >
                       {certificates.slice(certSlideIdx * certPerPage, certSlideIdx * certPerPage + certPerPage).map((cert) => {
                         const cardContent = (
-                          <div className="group relative border border-gray-900 bg-darkCard/30 p-3 hover:border-white transition-colors h-full flex flex-col justify-between cursor-pointer">
+                          <div className="group relative border border-gray-900 bg-darkCard/30 p-3 hover:border-gray-500 transition-colors h-full flex flex-col justify-between cursor-pointer">
                             <div>
                               <div className="flex justify-between items-start">
                                 <p className="text-[10px] sm:text-xs font-bold text-white uppercase pr-3">{cert.title}</p>
@@ -922,10 +921,9 @@ export default function App() {
                             <button
                               key={i}
                               onClick={() => goExpSlide(i)}
-                              className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${expSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
-                            >
-                              {i + 1}
-                            </button>
+                              className={`w-1.5 h-1.5 rounded-full transition-colors ${expSlideIdx === i ? 'bg-gray-400' : 'bg-gray-800 hover:bg-gray-600'}`}
+                              aria-label={`Page ${i + 1}`}
+                            />
                           ))}
                         </div>
                       )}
@@ -974,10 +972,9 @@ export default function App() {
                             <button
                               key={i}
                               onClick={() => goEduSlide(i)}
-                              className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${eduSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
-                            >
-                              {i + 1}
-                            </button>
+                              className={`w-1.5 h-1.5 rounded-full transition-colors ${eduSlideIdx === i ? 'bg-gray-400' : 'bg-gray-800 hover:bg-gray-600'}`}
+                              aria-label={`Page ${i + 1}`}
+                            />
                           ))}
                         </div>
                       )}
@@ -1044,10 +1041,9 @@ export default function App() {
                               <button
                                 key={i}
                                 onClick={() => goExpSlide(i)}
-                                className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${expSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
-                              >
-                                {i + 1}
-                              </button>
+                                className={`w-1.5 h-1.5 rounded-full transition-colors ${expSlideIdx === i ? 'bg-gray-400' : 'bg-gray-800 hover:bg-gray-600'}`}
+                                aria-label={`Page ${i + 1}`}
+                              />
                             ))}
                           </div>
                         )}
@@ -1092,10 +1088,9 @@ export default function App() {
                               <button
                                 key={i}
                                 onClick={() => goEduSlide(i)}
-                                className={`w-4 h-4 rounded-sm text-[8px] font-mono transition-colors ${eduSlideIdx === i ? 'bg-gray-600 text-white' : 'bg-[#141820] border border-[#1e2530] text-gray-500 hover:text-white'}`}
-                              >
-                                {i + 1}
-                              </button>
+                                className={`w-1.5 h-1.5 rounded-full transition-colors ${eduSlideIdx === i ? 'bg-gray-400' : 'bg-gray-800 hover:bg-gray-600'}`}
+                                aria-label={`Page ${i + 1}`}
+                              />
                             ))}
                           </div>
                         )}
@@ -1159,7 +1154,7 @@ export default function App() {
                       key={proj.id} 
                       className="w-full md:w-1/3 flex-shrink-0 px-2 sm:px-4"
                     >
-                      <div className="group relative border border-gray-900 bg-darkCard/30 p-5 sm:p-8 flex flex-col justify-between h-60 sm:h-72 transition-colors hover:border-white">
+                      <div className="group relative border border-gray-900 bg-darkCard/30 p-5 sm:p-8 flex flex-col justify-between h-60 sm:h-72 transition-colors hover:border-gray-500">
                         <div className="space-y-3 sm:space-y-4">
                           <span className="text-[9px] font-mono tracking-widest text-accentCyan uppercase block">
                             {getField(proj, 'category')}
@@ -1551,25 +1546,6 @@ export default function App() {
                     <div className="space-y-1">
                       <label className="text-[9px] text-gray-400 uppercase tracking-widest">About Text (EN)</label>
                       <textarea rows={4} required value={profileSettings.about_en || ''} onChange={(e) => setProfileSettings({...profileSettings, about_en: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan resize-none" />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">LinkedIn URL</label>
-                        <input type="text" required value={profileSettings.linkedin || ''} onChange={(e) => setProfileSettings({...profileSettings, linkedin: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Website URL</label>
-                        <input type="text" required value={profileSettings.website || ''} onChange={(e) => setProfileSettings({...profileSettings, website: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">Github URL</label>
-                        <input type="text" required value={profileSettings.github || ''} onChange={(e) => setProfileSettings({...profileSettings, github: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] text-gray-400 uppercase tracking-widest">YouTube URL</label>
-                        <input type="text" required value={profileSettings.youtube || ''} onChange={(e) => setProfileSettings({...profileSettings, youtube: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
