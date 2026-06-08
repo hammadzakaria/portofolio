@@ -139,6 +139,7 @@ const DICTIONARY = {
 
 export default function App() {
   const [lang, setLang] = useState('id');
+  const [langFading, setLangFading] = useState(false);
 
   // Mobile detection for dynamic carousel limits
   const [isMobile, setIsMobile] = useState(false);
@@ -318,6 +319,17 @@ export default function App() {
     const localizedKey = `${base}_${lang}`;
     const fallbackKey = lang === 'id' ? `${base}_en` : `${base}_id`;
     return item[localizedKey] || item[fallbackKey] || item[base] || '';
+  };
+
+  const switchLanguage = (newLang) => {
+    if (newLang === lang) return;
+    setLangFading(true);
+    setTimeout(() => {
+      setLang(newLang);
+      setTimeout(() => {
+        setLangFading(false);
+      }, 50);
+    }, 250);
   };
 
   // Contact form submission (mailto redirect)
@@ -588,14 +600,14 @@ export default function App() {
         <div className="flex items-center space-x-4 md:space-x-8">
           <div className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-gray-400 select-none">
             <button 
-              onClick={() => setLang('id')} 
+              onClick={() => switchLanguage('id')} 
               className={`hover:text-white transition-colors ${lang === 'id' ? 'text-accentCyan font-bold' : 'text-gray-400'}`}
             >
               ID
             </button>
             <span className="text-gray-600">|</span>
             <button 
-              onClick={() => setLang('en')} 
+              onClick={() => switchLanguage('en')} 
               className={`hover:text-white transition-colors ${lang === 'en' ? 'text-accentCyan font-bold' : 'text-gray-400'}`}
             >
               EN
@@ -661,7 +673,7 @@ export default function App() {
       {/* ==================== MAIN SNAP SCROLL CONTAINER ==================== */}
       <main 
         ref={scrollContainerRef}
-        className="h-screen w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar"
+        className={`h-screen w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar transition-opacity duration-300 ${langFading ? 'opacity-0' : 'opacity-100'}`}
       >
 
         {/* SECTION 1: HOME */}
@@ -1344,7 +1356,7 @@ export default function App() {
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               required
-              placeholder="Contoh: John Doe"
+              placeholder={lang === 'id' ? "Contoh: John Doe" : "e.g. John Doe"}
               className="w-full bg-darkCard border border-gray-800 px-4 py-3 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white transition-colors"
             />
           </div>
@@ -1356,7 +1368,7 @@ export default function App() {
               value={formEmail}
               onChange={(e) => setFormEmail(e.target.value)}
               required
-              placeholder="Contoh: john@company.com"
+              placeholder={lang === 'id' ? "Contoh: john@company.com" : "e.g. john@company.com"}
               className="w-full bg-darkCard border border-gray-800 px-4 py-3 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white transition-colors"
             />
           </div>
