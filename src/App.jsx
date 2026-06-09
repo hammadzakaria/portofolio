@@ -163,8 +163,16 @@ export default function App() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [activeSectionId, setActiveSectionId] = useState('section-home');
 
+  const [projPageIdx, setProjPageIdx] = useState(0);
+
   // Project slider pagination index
   const [selectedProject, setSelectedProject] = useState(null);
+  const [projModalImgIdx, setProjModalImgIdx] = useState(0);
+
+  useEffect(() => {
+    if (selectedProject) setProjModalImgIdx(0);
+  }, [selectedProject]);
+
   const [contactOpen, setContactOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expSlideIdx, setExpSlideIdx] = useState(0);
@@ -449,7 +457,7 @@ export default function App() {
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         callback(dataUrl);
       };
-      img.src = event.target.result;
+      img.src = event.result;
     };
     reader.readAsDataURL(file);
   };
@@ -483,9 +491,6 @@ export default function App() {
     return DICTIONARY[lang][key] || DICTIONARY['en'][key] || key;
   };
 
-  // Slider navigation
-
-
   // Smooth experience slide navigation
   const goExpSlide = useCallback((target) => {
     if (expAnimating) return;
@@ -503,7 +508,7 @@ export default function App() {
   // Smooth education slide navigation
   const goEduSlide = useCallback((target) => {
     if (eduAnimating) return;
-    const maxPage = Math.ceil(education.length / eduPerPage) - 1;
+    const maxPage = Math.ceil(educations.length / eduPerPage) - 1;
     let nextIdx = target === 'next' ? Math.min(eduSlideIdx + 1, maxPage) : target === 'prev' ? Math.max(eduSlideIdx - 1, 0) : target;
     if (nextIdx === eduSlideIdx) return;
     setEduDirection(nextIdx > eduSlideIdx ? 'next' : 'prev');
@@ -512,7 +517,34 @@ export default function App() {
       setEduSlideIdx(nextIdx);
       setTimeout(() => setEduAnimating(false), 50);
     }, 250);
-  }, [eduAnimating, eduSlideIdx, education.length, eduPerPage]);
+  }, [eduAnimating, eduSlideIdx, educations.length, eduPerPage]);
+
+  const getPortfolioPages = useCallback(() => {
+    if (!projects || projects.length === 0) return [];
+    if (isMobile) {
+      const pages = [];
+      for (let i = 0; i < projects.length; i += 3) {
+        pages.push(projects.slice(i, i + 3));
+      }
+      return pages;
+    } else {
+      const pages = [];
+      if (projects.length > 0) {
+        pages.push(projects.slice(0, 3));
+      }
+      for (let i = 3; i < projects.length; i += 6) {
+        pages.push(projects.slice(i, i + 6));
+      }
+      return pages;
+    }
+  }, [projects, isMobile]);
+
+  const portfolioPages = getPortfolioPages();
+
+  const goProjSlide = useCallback((target) => {
+    if (target === projPageIdx) return;
+    setProjPageIdx(target);
+  }, [projPageIdx]);
 
   // Smooth certification slide navigation
   const goCertSlide = useCallback((target) => {
@@ -1132,59 +1164,110 @@ export default function App() {
                   <span className="text-[10px] sm:text-xs font-bold tracking-mega text-gray-500 uppercase block">
                     {lang === 'id' ? 'KARYA PILIHAN' : 'SELECTED WORK'}
                   </span>
-                  <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white uppercase tracking-tight">
-                    {lang === 'id' ? 'Portofolio' : 'Portfolio'}
-                  </h2>
+                  <div className="flex items-center justify-between w-full">
+                    <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white uppercase tracking-tight pr-4">
+                      {lang === 'id' ? 'Portofolio' : 'Portfolio'}
+                    </h2>
+                    {portfolioPages.length > 1 && (
+                      <div className="flex items-center space-x-2">
+                        {portfolioPages.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => goProjSlide(i)}
+                            className={`w-1.5 h-1.5 rounded-full transition-colors ${projPageIdx === i ? 'bg-gray-400' : 'bg-gray-800 hover:bg-gray-600'}`}
+                            aria-label={`Page ${i + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Bento Grid Container */}
               <div className="w-full">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full">
-                  {projects.map((proj, idx) => {
+                  {portfolioPages[projPageIdx]?.map((proj, idx) => {
                     // Bento box logic
-                    // idx 0 -> large (2 cols, 2 rows)
-                    // idx 3 -> wide (2 cols, 1 row)
-                    const isLarge = idx % 5 === 0;
-                    const isWide = idx % 5 === 3;
+                    const isLarge = !isMobile && projPageIdx === 0 && idx === 0;
 
                     return (
                       <div 
                         key={proj.id} 
                         className={`group relative border border-gray-900 bg-darkCard/30 flex flex-col justify-between transition-colors hover:border-gray-500
-                          ${isLarge ? 'md:col-span-2 md:row-span-2 p-6 sm:p-10 min-h-[350px] sm:min-h-[450px]' : 
-                            isWide ? 'md:col-span-2 md:row-span-1 p-5 sm:p-8 min-h-[250px] sm:min-h-[280px]' : 
-                            'md:col-span-1 md:row-span-1 p-5 sm:p-8 min-h-[250px] sm:min-h-[280px]'}
+                          ${isLarge ? 'md:col-span-2 md:row-span-2 p-0 min-h-[400px]' : 'md:col-span-1 md:row-span-1 p-5 sm:p-8 min-h-[250px] sm:min-h-[280px]'}
                         `}
                       >
-                        <div className={`space-y-3 sm:space-y-4 ${isLarge ? 'md:space-y-6' : ''}`}>
-                          <span className="text-[9px] font-mono tracking-widest text-accentCyan uppercase block">
-                            {getField(proj, 'category')}
-                          </span>
-                          <h3 className={`font-bold text-white uppercase tracking-wide ${isLarge ? 'text-xl sm:text-2xl md:text-3xl' : 'text-sm sm:text-base'}`}>
-                            {getField(proj, 'title')}
-                          </h3>
-                          <p className={`text-textMuted font-light leading-relaxed select-text ${isLarge ? 'text-xs sm:text-sm line-clamp-5' : 'text-[11px] sm:text-xs line-clamp-3'}`}>
-                            {getField(proj, 'description')}
-                          </p>
-                        </div>
-                        
-                        <div className={`flex justify-between items-center border-t border-gray-900 transition-colors ${isLarge ? 'pt-5 sm:pt-6 mt-6' : 'pt-3 sm:pt-4 mt-4'}`}>
-                          <div className="flex flex-wrap gap-2 overflow-hidden">
-                            {proj.technologies && proj.technologies.slice(0, isMobile && !isLarge ? 2 : 4).map((tech, i) => (
-                              <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
-                                #{tech}
+                        {isLarge ? (
+                          <>
+                            <div className="w-full h-48 md:h-64 overflow-hidden border-b border-gray-900 relative">
+                               {(proj.images && proj.images.length > 0) ? (
+                                 <img src={proj.images[0]} alt={getField(proj, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                               ) : (
+                                 <div className="w-full h-full bg-darkBg/50 flex items-center justify-center text-gray-700 text-xs font-mono uppercase tracking-widest">No Image</div>
+                               )}
+                            </div>
+                            <div className="p-6 sm:p-10 flex flex-col justify-between flex-1">
+                              <div className="space-y-4 md:space-y-6">
+                                <span className="text-[9px] font-mono tracking-widest text-accentCyan uppercase block">
+                                  {getField(proj, 'category')}
+                                </span>
+                                <h3 className="font-bold text-white uppercase tracking-wide text-xl sm:text-2xl md:text-3xl">
+                                  {getField(proj, 'title')}
+                                </h3>
+                                <p className="text-textMuted font-light leading-relaxed select-text text-xs sm:text-sm line-clamp-3">
+                                  {getField(proj, 'description')}
+                                </p>
+                              </div>
+                              <div className="flex justify-between items-center border-t border-gray-900 transition-colors pt-5 sm:pt-6 mt-6">
+                                <div className="flex flex-wrap gap-2 overflow-hidden">
+                                  {proj.technologies && proj.technologies.slice(0, 4).map((tech, i) => (
+                                    <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
+                                      #{tech}
+                                    </span>
+                                  ))}
+                                </div>
+                                <button 
+                                  onClick={() => setSelectedProject(proj)}
+                                  className="text-[10px] font-bold tracking-widest text-white uppercase flex items-center space-x-1 group-hover:text-accentCyan transition-colors focus:outline-none flex-shrink-0"
+                                >
+                                  <span>{t('readMore')}</span>
+                                  <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="space-y-3 sm:space-y-4">
+                              <span className="text-[9px] font-mono tracking-widest text-accentCyan uppercase block">
+                                {getField(proj, 'category')}
                               </span>
-                            ))}
-                          </div>
-                          <button 
-                            onClick={() => setSelectedProject(proj)}
-                            className="text-[10px] font-bold tracking-widest text-white uppercase flex items-center space-x-1 group-hover:text-accentCyan transition-colors focus:outline-none flex-shrink-0"
-                          >
-                            <span>{t('readMore')}</span>
-                            <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
-                          </button>
-                        </div>
+                              <h3 className="font-bold text-white uppercase tracking-wide text-sm sm:text-base">
+                                {getField(proj, 'title')}
+                              </h3>
+                              <p className="text-textMuted font-light leading-relaxed select-text text-[11px] sm:text-xs line-clamp-3">
+                                {getField(proj, 'description')}
+                              </p>
+                            </div>
+                            <div className="flex justify-between items-center border-t border-gray-900 transition-colors pt-3 sm:pt-4 mt-4">
+                              <div className="flex flex-wrap gap-2 overflow-hidden">
+                                {proj.technologies && proj.technologies.slice(0, isMobile ? 2 : 4).map((tech, i) => (
+                                  <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
+                                    #{tech}
+                                  </span>
+                                ))}
+                              </div>
+                              <button 
+                                onClick={() => setSelectedProject(proj)}
+                                className="text-[10px] font-bold tracking-widest text-white uppercase flex items-center space-x-1 group-hover:text-accentCyan transition-colors focus:outline-none flex-shrink-0"
+                              >
+                                <span>{t('readMore')}</span>
+                                <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     );
                   })}
@@ -1225,38 +1308,25 @@ export default function App() {
             </header>
 
             <main className="flex-1 overflow-y-auto no-scrollbar py-8 sm:py-12 px-5 sm:px-12 md:px-24">
-              <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 sm:gap-12 items-start">
+              <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12 pb-12">
                 
-                <div className="md:col-span-7 space-y-6 sm:space-y-8">
+                {/* 1. Header & Short Desc */}
+                <div className="space-y-6 text-center">
                   <div className="space-y-3">
                     <span className="text-[10px] sm:text-xs font-bold tracking-widest text-accentCyan uppercase">
                       {getField(selectedProject, 'category')}
                     </span>
-                    <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold uppercase text-white tracking-tight leading-tight">
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase text-white tracking-tight leading-tight">
                       {getField(selectedProject, 'title')}
                     </h1>
                   </div>
-
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-bold tracking-widest text-gray-400 uppercase">{t('objectiveDetails')}</h3>
-                    <p className="text-base font-light text-textMuted leading-relaxed select-text">
-                      {getField(selectedProject, 'description')}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3 pt-4">
-                    <h3 className="text-xs font-bold tracking-widest text-gray-400 uppercase">{t('deploymentParams')}</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProject.technologies && selectedProject.technologies.map((tech, i) => (
-                        <span key={i} className="px-3 py-1.5 bg-darkCard border border-gray-800 text-xs font-mono text-white/80">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
+                  <p className="text-sm sm:text-base font-light text-textMuted leading-relaxed max-w-2xl mx-auto">
+                    {getField(selectedProject, 'description')}
+                  </p>
+                  
+                  {/* Action buttons */}
                   {selectedProject.link && selectedProject.link !== '#' && (
-                    <div className="pt-6">
+                    <div className="pt-4 flex justify-center">
                       <a 
                         href={selectedProject.link} 
                         target="_blank" 
@@ -1270,14 +1340,57 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="md:col-span-5">
-                  <div className="border border-gray-800 p-2 bg-darkCard/40 aspect-[4/3] w-full relative overflow-hidden group">
-                    <div 
-                      className="w-full h-full bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-700" 
-                      style={{ backgroundImage: `url(${selectedProject.image || '/workstation_bg.png'})` }}
-                    />
-                    <div className="absolute top-4 right-4 w-3 h-3 border-r border-t border-white/50" />
-                    <div className="absolute bottom-4 left-4 w-3 h-3 border-l border-b border-white/50" />
+                {/* 2. Image Carousel */}
+                <div className="w-full">
+                  <div className="border border-gray-800 p-2 bg-darkCard/40 aspect-video w-full relative overflow-hidden group">
+                    {selectedProject.images && selectedProject.images.length > 0 ? (
+                      <>
+                        <div 
+                          className="w-full h-full bg-cover bg-center transition-all duration-700" 
+                          style={{ backgroundImage: `url(${selectedProject.images[projModalImgIdx]})` }}
+                        />
+                        {/* Pagination for multiple images */}
+                        {selectedProject.images.length > 1 && (
+                          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
+                            {selectedProject.images.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setProjModalImgIdx(i)}
+                                className={`w-1.5 h-1.5 rounded-full transition-colors shadow-md ${projModalImgIdx === i ? 'bg-white' : 'bg-white/40 hover:bg-white/80'}`}
+                                aria-label={`View image ${i + 1}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex justify-center items-center text-gray-700 font-mono text-sm tracking-widest uppercase">
+                        No Image Available
+                      </div>
+                    )}
+                    <div className="absolute top-4 right-4 w-3 h-3 border-r border-t border-white/50 pointer-events-none" />
+                    <div className="absolute bottom-4 left-4 w-3 h-3 border-l border-b border-white/50 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 3. Detailed Description (Article Style) */}
+                {(getField(selectedProject, 'detail') || selectedProject.detail_id) && (
+                  <div className="prose prose-invert max-w-none text-gray-300 font-light text-sm sm:text-base leading-relaxed space-y-6 pt-4 border-t border-gray-900">
+                    {getField(selectedProject, 'detail').split('\n').map((paragraph, i) => (
+                      paragraph.trim() ? <p key={i}>{paragraph}</p> : <br key={i} />
+                    ))}
+                  </div>
+                )}
+                
+                {/* 4. Technologies Footer */}
+                <div className="pt-8 border-t border-gray-900">
+                  <h3 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4 text-center">{t('deploymentParams')}</h3>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {selectedProject.technologies && selectedProject.technologies.map((tech, i) => (
+                      <span key={i} className="px-3 py-1.5 bg-darkCard border border-gray-800 text-xs font-mono text-white/80 uppercase">
+                        {tech}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
@@ -1647,19 +1760,42 @@ export default function App() {
                         </div>
 
                         <div className="space-y-1">
+                          <label className="text-[9px] text-gray-400 uppercase tracking-widest">Detail Description (ID)</label>
+                          <textarea rows={5} value={editingItem.detail_id || ''} onChange={(e) => setEditingItem({...editingItem, detail_id: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan resize-none" placeholder="Long detailed description (optional)" />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-gray-400 uppercase tracking-widest">Detail Description (EN)</label>
+                          <textarea rows={5} value={editingItem.detail_en || ''} onChange={(e) => setEditingItem({...editingItem, detail_en: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan resize-none" placeholder="Long detailed description (optional)" />
+                        </div>
+
+                        <div className="space-y-1">
                           <label className="text-[9px] text-gray-400 uppercase tracking-widest">Technologies (comma separated)</label>
                           <input type="text" value={Array.isArray(editingItem.technologies) ? editingItem.technologies.join(', ') : editingItem.technologies || ''} onChange={(e) => setEditingItem({...editingItem, technologies: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-gray-400 uppercase tracking-widest">External Link</label>
-                            <input type="text" value={editingItem.link} onChange={(e) => setEditingItem({...editingItem, link: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-gray-400 uppercase tracking-widest">Image Upload</label>
-                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (dataUrl) => setEditingItem({...editingItem, image: dataUrl}))} className="w-full text-xs text-gray-400" />
-                            {editingItem.image && <img src={editingItem.image} alt="Project Preview" className="mt-2 w-full h-20 object-cover border border-[#2e394b]" />}
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-gray-400 uppercase tracking-widest">External Link</label>
+                          <input type="text" value={editingItem.link || ''} onChange={(e) => setEditingItem({...editingItem, link: e.target.value})} className="w-full bg-[#0c0e12] border border-[#2e394b] px-3 py-2 text-xs text-white focus:outline-none focus:border-accentCyan" />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-gray-400 uppercase tracking-widest">Project Images</label>
+                          <input type="file" accept="image/*" onChange={(e) => {
+                            handleImageUpload(e, (dataUrl) => {
+                              setEditingItem({
+                                ...editingItem,
+                                images: [...(editingItem.images || []), dataUrl]
+                              });
+                            });
+                          }} className="w-full text-xs text-gray-400 mb-2" />
+                          <div className="flex flex-wrap gap-2">
+                            {(editingItem.images || []).map((img, idx) => (
+                              <div key={idx} className="relative w-20 h-20 group">
+                                <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover border border-[#2e394b]" />
+                                <button type="button" onClick={() => setEditingItem({...editingItem, images: editingItem.images.filter((_, i) => i !== idx)})} className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 text-xs font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </>
