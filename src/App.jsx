@@ -164,9 +164,6 @@ export default function App() {
   const [activeSectionId, setActiveSectionId] = useState('section-home');
 
   // Project slider pagination index
-  const [projStartIdx, setProjStartIdx] = useState(0);
-  const maxVisibleProjects = isMobile ? 1 : 3;
-
   const [selectedProject, setSelectedProject] = useState(null);
   const [contactOpen, setContactOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -293,15 +290,6 @@ export default function App() {
   useEffect(() => {
     loadPortfolioData();
   }, []);
-
-  // Reset pagination if resizing
-  useEffect(() => {
-    if (projects.length > 0) {
-      if (projStartIdx + maxVisibleProjects > projects.length) {
-        setProjStartIdx(Math.max(0, projects.length - maxVisibleProjects));
-      }
-    }
-  }, [maxVisibleProjects, projects]);
 
   // Navigate to section by scroll snap trigger
   const scrollToSection = (index) => {
@@ -496,12 +484,7 @@ export default function App() {
   };
 
   // Slider navigation
-  const prevProjectSlide = () => {
-    setProjStartIdx(prev => Math.max(prev - 1, 0));
-  };
-  const nextProjectSlide = () => {
-    setProjStartIdx(prev => Math.min(prev + 1, projects.length - maxVisibleProjects));
-  };
+
 
   // Smooth experience slide navigation
   const goExpSlide = useCallback((target) => {
@@ -1155,33 +1138,40 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Flex row sliding container */}
-              <div className="relative px-2 sm:px-4 md:px-10 overflow-hidden w-full">
-                <div 
-                  className="flex transition-transform duration-500 ease-out"
-                  style={{ transform: `translateX(-${projStartIdx * (isMobile ? 100 : 33.333)}%)` }}
-                >
-                  {projects.map((proj) => (
-                    <div 
-                      key={proj.id} 
-                      className="w-full md:w-1/3 flex-shrink-0 px-2 sm:px-4"
-                    >
-                      <div className="group relative border border-gray-900 bg-darkCard/30 p-5 sm:p-8 flex flex-col justify-between h-60 sm:h-72 transition-colors hover:border-gray-500">
-                        <div className="space-y-3 sm:space-y-4">
+              {/* Bento Grid Container */}
+              <div className="w-full">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full">
+                  {projects.map((proj, idx) => {
+                    // Bento box logic
+                    // idx 0 -> large (2 cols, 2 rows)
+                    // idx 3 -> wide (2 cols, 1 row)
+                    const isLarge = idx % 5 === 0;
+                    const isWide = idx % 5 === 3;
+
+                    return (
+                      <div 
+                        key={proj.id} 
+                        className={`group relative border border-gray-900 bg-darkCard/30 flex flex-col justify-between transition-colors hover:border-gray-500
+                          ${isLarge ? 'md:col-span-2 md:row-span-2 p-6 sm:p-10 min-h-[350px] sm:min-h-[450px]' : 
+                            isWide ? 'md:col-span-2 md:row-span-1 p-5 sm:p-8 min-h-[250px] sm:min-h-[280px]' : 
+                            'md:col-span-1 md:row-span-1 p-5 sm:p-8 min-h-[250px] sm:min-h-[280px]'}
+                        `}
+                      >
+                        <div className={`space-y-3 sm:space-y-4 ${isLarge ? 'md:space-y-6' : ''}`}>
                           <span className="text-[9px] font-mono tracking-widest text-accentCyan uppercase block">
                             {getField(proj, 'category')}
                           </span>
-                          <h3 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
+                          <h3 className={`font-bold text-white uppercase tracking-wide ${isLarge ? 'text-xl sm:text-2xl md:text-3xl' : 'text-sm sm:text-base'}`}>
                             {getField(proj, 'title')}
                           </h3>
-                          <p className="text-[11px] sm:text-xs text-textMuted font-light leading-relaxed line-clamp-3 select-text">
+                          <p className={`text-textMuted font-light leading-relaxed select-text ${isLarge ? 'text-xs sm:text-sm line-clamp-5' : 'text-[11px] sm:text-xs line-clamp-3'}`}>
                             {getField(proj, 'description')}
                           </p>
                         </div>
                         
-                        <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-gray-900 transition-colors">
-                          <div className="flex space-x-2 overflow-hidden">
-                            {proj.technologies && proj.technologies.slice(0, isMobile ? 2 : 3).map((tech, i) => (
+                        <div className={`flex justify-between items-center border-t border-gray-900 transition-colors ${isLarge ? 'pt-5 sm:pt-6 mt-6' : 'pt-3 sm:pt-4 mt-4'}`}>
+                          <div className="flex flex-wrap gap-2 overflow-hidden">
+                            {proj.technologies && proj.technologies.slice(0, isMobile && !isLarge ? 2 : 4).map((tech, i) => (
                               <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
                                 #{tech}
                               </span>
@@ -1196,31 +1186,9 @@ export default function App() {
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-
-                {/* Left Side Arrow */}
-                {projStartIdx > 0 && (
-                  <button 
-                    onClick={prevProjectSlide}
-                    className="absolute left-0 sm:left-[-4px] md:left-[-8px] top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-darkBg/95 border border-gray-800 text-gray-400 hover:text-white hover:border-white transition-all duration-300 z-40 focus:outline-none rounded-full shadow-xl"
-                    aria-label="Previous slide"
-                  >
-                    <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
-                  </button>
-                )}
-
-                {/* Right Side Arrow */}
-                {projStartIdx + maxVisibleProjects < projects.length && (
-                  <button 
-                    onClick={nextProjectSlide}
-                    className="absolute right-0 sm:right-[-4px] md:right-[-8px] top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-darkBg/95 border border-gray-800 text-gray-400 hover:text-white hover:border-white transition-all duration-300 z-40 focus:outline-none rounded-full shadow-xl"
-                    aria-label="Next slide"
-                  >
-                    <ChevronRight size={14} className="sm:w-4 sm:h-4" />
-                  </button>
-                )}
               </div>
               
               {/* Footer */}
