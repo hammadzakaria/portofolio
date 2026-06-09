@@ -1201,8 +1201,8 @@ export default function App() {
                         {isLarge ? (
                           <>
                             <div className="w-full h-48 md:h-64 overflow-hidden border-b border-gray-900 relative">
-                               {(proj.images && proj.images.length > 0) ? (
-                                 <img src={proj.images[0]} alt={getField(proj, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                               {(Array.isArray(proj.images) && proj.images.length > 0) || proj.image ? (
+                                 <img src={(Array.isArray(proj.images) && proj.images.length > 0) ? proj.images[0] : proj.image} alt={getField(proj, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                                ) : (
                                  <div className="w-full h-full bg-darkBg/50 flex items-center justify-center text-gray-700 text-xs font-mono uppercase tracking-widest">No Image</div>
                                )}
@@ -1221,7 +1221,7 @@ export default function App() {
                               </div>
                               <div className="flex justify-between items-center border-t border-gray-900 transition-colors pt-5 sm:pt-6 mt-6">
                                 <div className="flex flex-wrap gap-2 overflow-hidden">
-                                  {proj.technologies && proj.technologies.slice(0, 4).map((tech, i) => (
+                                  {Array.isArray(proj.technologies) && proj.technologies.slice(0, 4).map((tech, i) => (
                                     <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
                                       #{tech}
                                     </span>
@@ -1252,7 +1252,7 @@ export default function App() {
                             </div>
                             <div className="flex justify-between items-center border-t border-gray-900 transition-colors pt-3 sm:pt-4 mt-4">
                               <div className="flex flex-wrap gap-2 overflow-hidden">
-                                {proj.technologies && proj.technologies.slice(0, isMobile ? 2 : 4).map((tech, i) => (
+                                {Array.isArray(proj.technologies) && proj.technologies.slice(0, isMobile ? 2 : 4).map((tech, i) => (
                                   <span key={i} className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase">
                                     #{tech}
                                   </span>
@@ -1343,14 +1343,14 @@ export default function App() {
                 {/* 2. Image Carousel */}
                 <div className="w-full">
                   <div className="border border-gray-800 p-2 bg-darkCard/40 aspect-video w-full relative overflow-hidden group">
-                    {selectedProject.images && selectedProject.images.length > 0 ? (
+                    {(Array.isArray(selectedProject.images) && selectedProject.images.length > 0) || selectedProject.image ? (
                       <>
                         <div 
                           className="w-full h-full bg-cover bg-center transition-all duration-700" 
-                          style={{ backgroundImage: `url(${selectedProject.images[projModalImgIdx]})` }}
+                          style={{ backgroundImage: `url(${Array.isArray(selectedProject.images) && selectedProject.images.length > 0 ? selectedProject.images[projModalImgIdx] : selectedProject.image})` }}
                         />
                         {/* Pagination for multiple images */}
-                        {selectedProject.images.length > 1 && (
+                        {Array.isArray(selectedProject.images) && selectedProject.images.length > 1 && (
                           <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
                             {selectedProject.images.map((_, i) => (
                               <button
@@ -1376,7 +1376,7 @@ export default function App() {
                 {/* 3. Detailed Description (Article Style) */}
                 {(getField(selectedProject, 'detail') || selectedProject.detail_id) && (
                   <div className="prose prose-invert max-w-none text-gray-300 font-light text-sm sm:text-base leading-relaxed space-y-6 pt-4 border-t border-gray-900">
-                    {getField(selectedProject, 'detail').split('\n').map((paragraph, i) => (
+                    {String(getField(selectedProject, 'detail') || selectedProject.detail_id || '').split('\n').map((paragraph, i) => (
                       paragraph.trim() ? <p key={i}>{paragraph}</p> : <br key={i} />
                     ))}
                   </div>
@@ -1386,7 +1386,7 @@ export default function App() {
                 <div className="pt-8 border-t border-gray-900">
                   <h3 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4 text-center">{t('deploymentParams')}</h3>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {selectedProject.technologies && selectedProject.technologies.map((tech, i) => (
+                    {Array.isArray(selectedProject.technologies) && selectedProject.technologies.map((tech, i) => (
                       <span key={i} className="px-3 py-1.5 bg-darkCard border border-gray-800 text-xs font-mono text-white/80 uppercase">
                         {tech}
                       </span>
@@ -1790,7 +1790,7 @@ export default function App() {
                             });
                           }} className="w-full text-xs text-gray-400 mb-2" />
                           <div className="flex flex-wrap gap-2">
-                            {(editingItem.images || []).map((img, idx) => (
+                            {(Array.isArray(editingItem.images) ? editingItem.images : []).map((img, idx) => (
                               <div key={idx} className="relative w-20 h-20 group">
                                 <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover border border-[#2e394b]" />
                                 <button type="button" onClick={() => setEditingItem({...editingItem, images: editingItem.images.filter((_, i) => i !== idx)})} className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 text-xs font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
