@@ -508,7 +508,7 @@ export default function App() {
   // Smooth education slide navigation
   const goEduSlide = useCallback((target) => {
     if (eduAnimating) return;
-    const maxPage = Math.ceil(educations.length / eduPerPage) - 1;
+    const maxPage = Math.ceil(education.length / eduPerPage) - 1;
     let nextIdx = target === 'next' ? Math.min(eduSlideIdx + 1, maxPage) : target === 'prev' ? Math.max(eduSlideIdx - 1, 0) : target;
     if (nextIdx === eduSlideIdx) return;
     setEduDirection(nextIdx > eduSlideIdx ? 'next' : 'prev');
@@ -517,7 +517,7 @@ export default function App() {
       setEduSlideIdx(nextIdx);
       setTimeout(() => setEduAnimating(false), 50);
     }, 250);
-  }, [eduAnimating, eduSlideIdx, educations.length, eduPerPage]);
+  }, [eduAnimating, eduSlideIdx, education.length, eduPerPage]);
 
   const getPortfolioPages = useCallback(() => {
     if (!projects || projects.length === 0) return [];
